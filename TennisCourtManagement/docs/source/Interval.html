@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-form-recurrence-option-Interval'>/**
+</span> * The widget that represents the interval portion of an RRULE.
+ */
+Ext.define(&#39;Extensible.form.recurrence.option.Interval&#39;, {
+    extend: &#39;Extensible.form.recurrence.AbstractOption&#39;,
+    alias: &#39;widget.extensible.recurrence-interval&#39;,
+    
+<span id='Extensible-form-recurrence-option-Interval-property-dateLabelFormat'>    dateLabelFormat: &#39;l, F j&#39;,
+</span><span id='Extensible-form-recurrence-option-Interval-property-unit'>    unit: &#39;day&#39;,
+</span><span id='Extensible-form-recurrence-option-Interval-property-minValue'>    minValue: 1,
+</span><span id='Extensible-form-recurrence-option-Interval-property-maxValue'>    maxValue: 999,
+</span><span id='Extensible-form-recurrence-option-Interval-property-startDateWidth'>    startDateWidth: 120,
+</span>    
+<span id='Extensible-form-recurrence-option-Interval-property-strings'>    strings: {
+</span>        repeatEvery: &#39;Repeat every&#39;,
+        beginning: &#39;beginning&#39;,
+        day: &#39;day&#39;,
+        days: &#39;days&#39;,
+        week: &#39;week&#39;,
+        weeks: &#39;weeks&#39;,
+        month: &#39;month&#39;,
+        months: &#39;months&#39;,
+        year: &#39;year&#39;,
+        years: &#39;years&#39;
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-property-cls'>    cls: &#39;extensible-recur-interval&#39;,
+</span>    
+<span id='Extensible-form-recurrence-option-Interval-method-initComponent'>    initComponent: function() {
+</span>        this.addEvents(
+<span id='Extensible-form-recurrence-option-Interval-event-startchange'>            /**
+</span>             * @event startchange
+             * Fires when the start date of the recurrence series is changed
+             * @param {Extensible.form.recurrence.option.Interval} this
+             * @param {Date} newDate The new start date
+             * @param {Date} oldDate The previous start date
+             */
+            &#39;startchange&#39;
+        );
+        this.callParent(arguments);
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-getItemConfigs'>    getItemConfigs: function() {
+</span>        return [
+            this.getRepeatEveryLabelConfig(),
+            this.getIntervalComboConfig(),
+            this.getBeginDateLabelConfig(),
+            this.getBeginDateFieldConfig()
+        ];
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-getRepeatEveryLabelConfig'>    getRepeatEveryLabelConfig: function() {
+</span>        return {
+            xtype: &#39;label&#39;,
+            text: this.strings.repeatEvery
+        };
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-getIntervalComboConfig'>    getIntervalComboConfig: function() {
+</span>        var me = this;
+        
+        return {
+            xtype: &#39;numberfield&#39;,
+            itemId: me.id + &#39;-interval&#39;,
+            value: 1,
+            width: 55,
+            minValue: me.minValue,
+            maxValue: me.maxValue,
+            allowBlank: false,
+            enableKeyEvents: true,
+            listeners: {
+                &#39;change&#39;: Ext.bind(me.onIntervalChange, me)
+            }
+        };
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-getBeginDateLabelConfig'>    getBeginDateLabelConfig: function() {
+</span>        return {
+            xtype: &#39;label&#39;,
+            itemId: this.id + &#39;-date-label&#39;
+        };
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-getBeginDateFieldConfig'>    getBeginDateFieldConfig: function() {
+</span>        var me = this,
+            startDate = me.getStartDate();
+        
+        return {
+            xtype: &#39;datefield&#39;,
+            itemId: me.id + &#39;-start-date&#39;,
+            width: me.startDateWidth,
+            // format: me.endDateFormat || Ext.form.field.Date.prototype.format,
+            startDay: this.startDay,
+            maxValue: me.maxEndDate,
+            allowBlank: false,
+            value: startDate,
+            
+            listeners: {
+                &#39;change&#39;: Ext.bind(me.onStartDateChange, me)
+            }
+        };
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-initRefs'>    initRefs: function() {
+</span>        var me = this;
+        me.intervalField = me.down(&#39;#&#39; + me.id + &#39;-interval&#39;);
+        me.dateLabel = me.down(&#39;#&#39; + me.id + &#39;-date-label&#39;);
+        me.startDateField = me.down(&#39;#&#39; + me.id + &#39;-start-date&#39;);
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-onIntervalChange'>    onIntervalChange: function(field, value, oldValue) {
+</span>        this.checkChange();
+        this.updateLabel();
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-onStartDateChange'>    onStartDateChange: function(field, value, oldValue) {
+</span>        this.checkChange();
+        this.fireEvent(&#39;startchange&#39;, this, value, oldValue);
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-getValue'>    getValue: function() {
+</span>        if (this.intervalField) {
+            return &#39;INTERVAL=&#39; + this.intervalField.getValue();
+        }
+        return &#39;&#39;;
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-setValue'>    setValue: function(v) {
+</span>        var me = this;
+        
+        if (!me.preSetValue(v, me.intervalField)) {
+            return me;
+        }
+        if (!v) {
+            me.intervalField.setValue(me.minValue);
+            return me;
+        }
+        var options = Ext.isArray(v) ? v : v.split(me.optionDelimiter),
+            parts;
+
+        Ext.each(options, function(option) {
+            parts = option.split(&#39;=&#39;);
+            
+            if (parts[0] === &#39;INTERVAL&#39;) {
+                me.intervalField.setValue(parts[1]);
+                me.updateLabel();
+                return;
+            }
+        }, me);
+        
+        return me;
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-setStartDate'>    setStartDate: function(dt) {
+</span>        this.startDate = dt;
+        this.startDateField.setValue(dt);
+        return this;
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-setUnit'>    setUnit: function(unit) {
+</span>        this.unit = unit;
+        this.updateLabel();
+        return this;
+    },
+    
+<span id='Extensible-form-recurrence-option-Interval-method-updateLabel'>    updateLabel: function(unit) {
+</span>        var me = this;
+        
+        if (me.intervalField) {
+            // TODO: Change this to support locale text
+            var s = me.intervalField.getValue() === 1 ? &#39;&#39; : &#39;s&#39;;
+            me.unit = unit ? unit.toLowerCase() : me.unit || &#39;day&#39;;
+            
+            if (me.dateLabel) {
+                me.dateLabel.update(me.strings[me.unit + s] + &#39; &#39; + me.strings.beginning);
+            }
+        }
+        return me;
+    }
+});
+</pre>
+</body>
+</html>

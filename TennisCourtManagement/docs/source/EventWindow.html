@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-form-EventWindow-method-constructor'><span id='Extensible-calendar-form-EventWindow'>/**
+</span></span> * A custom window containing a basic edit form used for quick editing of events.
+ *
+ * This window also provides custom events specific to the calendar so that other calendar components can be easily
+ * notified when an event has been edited via this component.
+ *
+ * The default configs are as follows:
+ *		// Locale configs
+ *		titleTextAdd: &#39;Add Event&#39;,
+ *		titleTextEdit: &#39;Edit Event&#39;,
+ *		width: 600,
+ *		labelWidth: 65,
+ *		detailsLinkText: &#39;Edit Details...&#39;,
+ *		savingMessage: &#39;Saving changes...&#39;,
+ *		deletingMessage: &#39;Deleting event...&#39;,
+ *		saveButtonText: &#39;Save&#39;,
+ *		deleteButtonText: &#39;Delete&#39;,
+ *		cancelButtonText: &#39;Cancel&#39;,
+ *		titleLabelText: &#39;Title&#39;,
+ *		datesLabelText: &#39;When&#39;,
+ *		calendarLabelText: &#39;Calendar&#39;,
+ *
+ *		// General configs
+ *		closeAction: &#39;hide&#39;,
+ *		modal: false,
+ *		resizable: false,
+ *		constrain: true,
+ *		buttonAlign: &#39;left&#39;,
+ *		editDetailsLinkClass: &#39;edit-dtl-link&#39;,
+ *		enableEditDetails: true,
+ *		bodyStyle: &#39;padding: 8px 10px 5px;&#39;,
+ *		layout: &#39;fit&#39;
+ * @constructor
+ * @param {Object} config The config object
+ */
+Ext.define(&#39;Extensible.calendar.form.EventWindow&#39;, {
+    extend: &#39;Ext.window.Window&#39;,
+    alias: &#39;widget.extensible.eventeditwindow&#39;,
+
+    requires: [
+        &#39;Ext.form.Panel&#39;,
+        &#39;Extensible.calendar.data.EventModel&#39;,
+        &#39;Extensible.calendar.data.EventMappings&#39;,
+        &#39;Extensible.form.recurrence.RangeEditWindow&#39;
+    ],
+
+<span id='Extensible-calendar-form-EventWindow-property-titleTextAdd'>    // Locale configs
+</span>    titleTextAdd: &#39;Add Event&#39;,
+<span id='Extensible-calendar-form-EventWindow-property-titleTextEdit'>    titleTextEdit: &#39;Edit Event&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-width'>    width: 600,
+</span><span id='Extensible-calendar-form-EventWindow-property-labelWidth'>    labelWidth: 65,
+</span><span id='Extensible-calendar-form-EventWindow-property-detailsLinkText'>    detailsLinkText: &#39;Edit Details...&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-savingMessage'>    savingMessage: &#39;Saving changes...&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-deletingMessage'>    deletingMessage: &#39;Deleting event...&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-saveButtonText'>    saveButtonText: &#39;Save&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-deleteButtonText'>    deleteButtonText: &#39;Delete&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-cancelButtonText'>    cancelButtonText: &#39;Cancel&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-titleLabelText'>    titleLabelText: &#39;Title&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-datesLabelText'>    datesLabelText: &#39;When&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-calendarLabelText'>    calendarLabelText: &#39;Calendar&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-cfg-startDay'>    /**
+</span>     * @cfg {Number} startDay
+     * The 0-based index for the day on which the calendar week begins (0=Sunday, which is the default)
+     */
+    startDay: 0,
+
+<span id='Extensible-calendar-form-EventWindow-property-closeAction'>    // General configs
+</span>    closeAction: &#39;hide&#39;,
+<span id='Extensible-calendar-form-EventWindow-property-modal'>    modal: false,
+</span><span id='Extensible-calendar-form-EventWindow-property-resizable'>    resizable: false,
+</span><span id='Extensible-calendar-form-EventWindow-property-constrain'>    constrain: true,
+</span><span id='Extensible-calendar-form-EventWindow-property-buttonAlign'>    buttonAlign: &#39;left&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-editDetailsLinkClass'>    editDetailsLinkClass: &#39;edit-dtl-link&#39;,
+</span><span id='Extensible-calendar-form-EventWindow-property-enableEditDetails'>    enableEditDetails: true,
+</span><span id='Extensible-calendar-form-EventWindow-property-layout'>    layout: &#39;fit&#39;,
+</span>
+<span id='Extensible-calendar-form-EventWindow-property-formPanelConfig'>    formPanelConfig: {
+</span>        border: false
+    },
+
+<span id='Extensible-calendar-form-EventWindow-cfg-allowDefaultAdd'>    /**
+</span>     * @cfg {Boolean} allowDefaultAdd
+     * @since 1.6.0
+     * True to allow the user to save the initial default record displayed in the form while in Add mode
+     * and the record is not dirty (default). If false, the form save action will be treated as a cancel action
+     * if no editing was performed while in Add mode and the record will not be added. Note that this setting
+     * does not apply when in Edit mode. The save action will always be treated as cancel in Edit mode if
+     * the form is not dirty.
+     *
+     * When this option is true any blank or default field values should be allowed by the back end
+     * system handling the operation. For example, by default if the event title is blank the calendar views
+     * will substitute the value of {@link Extensible.calendar.view.AbstractCalendar#defaultEventTitleText
+     * defaultEventTitleText} when displaying it. Any custom fields might require similar custom handling.
+     */
+    allowDefaultAdd: true,
+
+<span id='Extensible-calendar-form-EventWindow-method-initComponent'>    initComponent: function() {
+</span>        this.addEvents({
+<span id='Extensible-calendar-form-EventWindow-event-eventadd'>            /**
+</span>             * @event eventadd
+             * Fires after a new event is added
+             * @param {Extensible.calendar.form.EventWindow} this
+             * @param {Extensible.calendar.data.EventModel} rec The new {@link Extensible.calendar.data.EventModel
+             * record} that was added
+             * @param {Ext.Element} el The target element
+             */
+            eventadd: true,
+<span id='Extensible-calendar-form-EventWindow-event-eventupdate'>            /**
+</span>             * @event eventupdate
+             * Fires after an existing event is updated
+             * @param {Extensible.calendar.form.EventWindow} this
+             * @param {Extensible.calendar.data.EventModel} rec The new {@link Extensible.calendar.data.EventModel
+             * record} that was updated
+             * @param {Ext.Element} el The target element
+             */
+            eventupdate: true,
+<span id='Extensible-calendar-form-EventWindow-event-eventdelete'>            /**
+</span>             * @event eventdelete
+             * Fires after an event is deleted
+             * @param {Extensible.calendar.form.EventWindow} this
+             * @param {Extensible.calendar.data.EventModel} rec The new {@link Extensible.calendar.data.EventModel
+             * record} that was deleted
+             * @param {Ext.Element} el The target element
+             */
+            eventdelete: true,
+<span id='Extensible-calendar-form-EventWindow-event-eventcancel'>            /**
+</span>             * @event eventcancel
+             * Fires after an event add/edit operation is canceled by the user and no store update took place
+             * @param {Extensible.calendar.form.EventWindow} this
+             * @param {Extensible.calendar.data.EventModel} rec The new {@link Extensible.calendar.data.EventModel
+             * record} that was canceled
+             * @param {Ext.Element} el The target element
+             */
+            eventcancel: true,
+<span id='Extensible-calendar-form-EventWindow-event-editdetails'>            /**
+</span>             * @event editdetails
+             * Fires when the user selects the option in this window to continue editing in the detailed edit form
+             * (by default, an instance of {@link Extensible.calendar.form.EventDetails}. Handling code should hide
+             * this window and transfer the current event record to the appropriate instance of the detailed form by
+             * showing it and calling {@link Extensible.calendar.form.EventDetails#loadRecord loadRecord}.
+             * @param {Extensible.calendar.form.EventWindow} this
+             * @param {Extensible.calendar.data.EventModel} rec The {@link Extensible.calendar.data.EventModel record}
+             * that is currently being edited
+             * @param {Ext.Element} el The target element
+             */
+            editdetails: true
+        });
+
+        this.fbar = this.getFooterBarConfig();
+
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-getFooterBarConfig'>    getFooterBarConfig: function() {
+</span>        var cfg = [&#39;-&gt;&#39;, {
+                text: this.saveButtonText,
+                itemId: this.id + &#39;-save-btn&#39;,
+                disabled: false,
+                handler: this.onSave,
+                scope: this
+            },{
+                text: this.deleteButtonText,
+                itemId: this.id + &#39;-delete-btn&#39;,
+                disabled: false,
+                handler: this.onDelete,
+                scope: this,
+                hideMode: &#39;offsets&#39; // IE requires this
+            },{
+                text: this.cancelButtonText,
+                itemId: this.id + &#39;-cancel-btn&#39;,
+                disabled: false,
+                handler: this.onCancel,
+                scope: this
+            }];
+
+        if(this.enableEditDetails !== false) {
+            cfg.unshift({
+                xtype: &#39;tbtext&#39;,
+                itemId: this.id + &#39;-details-btn&#39;,
+                text: &#39;&lt;a href=&quot;#&quot; class=&quot;&#39; + this.editDetailsLinkClass + &#39;&quot;&gt;&#39; + this.detailsLinkText + &#39;&lt;/a&gt;&#39;
+            });
+        }
+        return cfg;
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-onRender'>    onRender : function(ct, position){
+</span>        this.formPanel = Ext.create(&#39;Ext.form.Panel&#39;, Ext.applyIf({
+            fieldDefaults: {
+                labelWidth: this.labelWidth
+            },
+            items: this.getFormItemConfigs()
+        }, this.formPanelConfig));
+
+        this.add(this.formPanel);
+
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-getFormItemConfigs'>    getFormItemConfigs: function() {
+</span>        var items = [{
+            xtype: &#39;textfield&#39;,
+            itemId: this.id + &#39;-title&#39;,
+            name: Extensible.calendar.data.EventMappings.Title.name,
+            fieldLabel: this.titleLabelText,
+            anchor: &#39;100%&#39;
+        },{
+            xtype: &#39;extensible.daterangefield&#39;,
+            itemId: this.id + &#39;-dates&#39;,
+            name: &#39;dates&#39;,
+            anchor: &#39;95%&#39;,
+            singleLine: true,
+            startDay: this.startDay,
+            fieldLabel: this.datesLabelText
+        }];
+
+        if(this.calendarStore) {
+            items.push({
+                xtype: &#39;extensible.calendarcombo&#39;,
+                itemId: this.id + &#39;-calendar&#39;,
+                name: Extensible.calendar.data.EventMappings.CalendarId.name,
+                anchor: &#39;100%&#39;,
+                fieldLabel: this.calendarLabelText,
+                store: this.calendarStore
+            });
+        }
+
+        return items;
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-afterRender'>    afterRender: function() {
+</span>        this.callParent(arguments);
+
+        this.el.addCls(&#39;ext-cal-event-win&#39;);
+
+        this.initRefs();
+
+        // This junk spacer item gets added to the fbar by Ext (fixed in 4.0.2)
+        var junkSpacer = this.getDockedItems(&#39;toolbar&#39;)[0].items.items[0];
+        if (junkSpacer.el.hasCls(&#39;x-component-default&#39;)) {
+            Ext.destroy(junkSpacer);
+        }
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-initRefs'>    initRefs: function() {
+</span>        // toolbar button refs
+        this.saveButton = this.down(&#39;#&#39; + this.id + &#39;-save-btn&#39;);
+        this.deleteButton = this.down(&#39;#&#39; + this.id + &#39;-delete-btn&#39;);
+        this.cancelButton = this.down(&#39;#&#39; + this.id + &#39;-cancel-btn&#39;);
+        this.detailsButton = this.down(&#39;#&#39; + this.id + &#39;-details-btn&#39;);
+
+        if (this.detailsButton) {
+            this.detailsButton.getEl().on(&#39;click&#39;, this.onEditDetailsClick, this);
+        }
+
+        // form item refs
+        this.titleField = this.down(&#39;#&#39; + this.id + &#39;-title&#39;);
+        this.dateRangeField = this.down(&#39;#&#39; + this.id + &#39;-dates&#39;);
+        this.calendarField = this.down(&#39;#&#39; + this.id + &#39;-calendar&#39;);
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-onEditDetailsClick'>    onEditDetailsClick: function(e) {
+</span>        e.stopEvent();
+        this.updateRecord(this.activeRecord, true);
+        this.fireEvent(&#39;editdetails&#39;, this, this.activeRecord, this.animateTarget);
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-show'>    /**
+</span>     * Shows the window, rendering it first if necessary, or activates it and brings it to front if hidden.
+     * @param {Ext.data.Record/Object} o Either a {@link Ext.data.Record} if showing the form
+     * for an existing event in edit mode, or a plain object containing a StartDate property (and
+     * optionally an EndDate property) for showing the form in add mode.
+     * @param {String/Element} animateTarget (optional) The target element or id from which the window should
+     * animate while opening (defaults to null with no animation)
+     * @return {Ext.Window} this
+     */
+    show: function(o, animateTarget) {
+        var me = this,
+            EventMappings = Extensible.calendar.data.EventMappings,
+            form, rec;
+
+        // Work around the CSS day cell height hack needed for initial render in IE8/strict:
+        me.animateTarget = (Ext.isIE8 &amp;&amp; Ext.isStrict) ? null : animateTarget;
+
+        me.callParent([me.animateTarget, function() {
+            if (me.titleField) {
+                me.titleField.focus(false, 100);
+            }
+        }, me]);
+
+        form = me.formPanel.form;
+
+        // Only show the delete button if the data includes an EventID, otherwise
+        // we&#39;re adding a new record
+        me.deleteButton[o.data &amp;&amp; o.data[EventMappings.EventId.name] ? &#39;show&#39; : &#39;hide&#39;]();
+
+        if (o.data) {
+            rec = o;
+            me.setTitle(rec.phantom ? me.titleTextAdd : me.titleTextEdit);
+            form.loadRecord(rec);
+        }
+        else {
+            me.setTitle(me.titleTextAdd);
+
+            var start = o[EventMappings.StartDate.name],
+                end = o[EventMappings.EndDate.name] || Extensible.Date.add(start, {hours: 1});
+
+            rec = Ext.create(&#39;Extensible.calendar.data.EventModel&#39;);
+
+            rec.data[EventMappings.Title.name] = o[EventMappings.Title.name]; // in case it&#39;s set
+            rec.data[EventMappings.StartDate.name] = start;
+            rec.data[EventMappings.EndDate.name] = end;
+
+            rec.data[EventMappings.IsAllDay.name] = !!o[EventMappings.IsAllDay.name] ||
+                (start.getDate() !== Extensible.Date.add(end, {millis: 1}).getDate());
+
+            if (EventMappings.CalendarId) {
+                rec.data[EventMappings.CalendarId.name] = me.calendarStore ?
+                    me.calendarStore.getAt(0).data[Extensible.calendar.data.CalendarMappings.CalendarId.name] : &#39;&#39;;
+            }
+
+            if (EventMappings.Duration) {
+                rec.data[EventMappings.Duration.name] = Extensible.Date.diff(start, end,
+                    Extensible.calendar.data.EventModel.resolution);
+            }
+
+            form.reset();
+            form.loadRecord(rec);
+        }
+
+        if (EventMappings.RInstanceStartDate) {
+            rec.data[EventMappings.RInstanceStartDate.name] = rec.getStartDate();
+        }
+
+        me.dateRangeField.setValue(rec.data);
+        me.activeRecord = rec;
+
+        // Using setValue() results in dirty fields, so we reset the field state
+        // after loading the form so that the current values are the &quot;original&quot; values
+        form.getFields().each(function(item) {
+            item.resetOriginalValue();
+        });
+
+        return me;
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-roundTime'>    roundTime: function(dt, incr) {
+</span>        incr = incr || 15;
+        var m = parseInt(dt.getMinutes(), 10);
+        return dt.add(&#39;mi&#39;, incr - (m % incr));
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-onCancel'>    onCancel: function() {
+</span>        this.cleanup(true);
+        this.fireEvent(&#39;eventcancel&#39;, this, this.activeRecord, this.animateTarget);
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-cleanup'>    cleanup: function(hide) {
+</span>        if (this.activeRecord) {
+            this.activeRecord.reject();
+        }
+        delete this.activeRecord;
+
+        if (hide===true) {
+            // Work around the CSS day cell height hack needed for initial render in IE8/strict:
+            //var anim = afterDelete || (Ext.isIE8 &amp;&amp; Ext.isStrict) ? null : this.animateTarget;
+            this.hide();
+        }
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-updateRecord'>    updateRecord: function(record, keepEditing) {
+</span>        var fields = record.fields,
+            values = this.formPanel.getForm().getValues(),
+            EventMappings = Extensible.calendar.data.EventMappings,
+            name,
+            obj = {},
+            modified;
+
+        fields.each(function(f) {
+            name = f.name;
+            if (name in values) {
+                obj[name] = values[name];
+            }
+        });
+
+        var dates = this.dateRangeField.getValue(),
+            startDate = obj[EventMappings.StartDate.name] = dates[0],
+            endDate = obj[EventMappings.EndDate.name] = dates[1];
+
+        obj[EventMappings.IsAllDay.name] = dates[2];
+
+        if (EventMappings.Duration) {
+            obj[EventMappings.Duration.name] = Extensible.Date.diff(startDate, endDate,
+                Extensible.calendar.data.EventModel.resolution);
+        }
+
+        record.beginEdit();
+        record.set(obj);
+
+        if (!keepEditing || !modified) {
+            record.endEdit();
+        }
+
+        return record.dirty || (record.phantom &amp;&amp; this.allowDefaultAdd);
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-onSave'>    onSave: function() {
+</span>        var me = this,
+            form = me.formPanel.form,
+            originalHasRecurrence = me.activeRecord.isRecurring();
+
+        if (!form.isDirty() &amp;&amp; !me.allowDefaultAdd) {
+            me.onCancel();
+            return;
+        }
+        if (!form.isValid()) {
+            return;
+        }
+
+        if (!me.updateRecord(me.activeRecord)) {
+            me.onCancel();
+            return;
+        }
+
+        if (me.activeRecord.phantom) {
+            me.fireEvent(&#39;eventadd&#39;, me, me.activeRecord, me.animateTarget);
+        }
+        else {
+            if (originalHasRecurrence &amp;&amp; me.activeRecord.isRecurring()) {
+                // We only need to prompt when editing an event that was recurring before being edited and is
+                // still recurring after being edited. If a normal event is edited to make it recurring or a
+                // recurring event is edited to make it normal just do a standard update.
+                me.onRecurrenceUpdate();
+            }
+            else {
+                me.fireEvent(&#39;eventupdate&#39;, me, me.activeRecord, me.animateTarget);
+            }
+        }
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-onRecurrenceUpdate'>    onRecurrenceUpdate: function() {
+</span>        this.rangeEditWin = this.rangeEditWin || Ext.WindowMgr.get(&#39;ext-cal-rangeeditwin&#39;);
+        if (!this.rangeEditWin) {
+            this.rangeEditWin = new Extensible.form.recurrence.RangeEditWindow();
+        }
+        this.rangeEditWin.prompt({
+            callback: this.onRecurrenceEditModeSelected,
+            scope: this
+        });
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-onRecurrenceEditModeSelected'>    onRecurrenceEditModeSelected: function(editMode) {
+</span>        var me = this;
+
+        if (editMode) {
+            me.activeRecord.data[Extensible.calendar.data.EventMappings.REditMode.name] = editMode;
+            me.fireEvent(&#39;eventupdate&#39;, me, me.activeRecord, me.animateTarget);
+        }
+    },
+
+<span id='Extensible-calendar-form-EventWindow-method-onDelete'>    onDelete: function() {
+</span>        this.fireEvent(&#39;eventdelete&#39;, this, this.activeRecord, this.animateTarget);
+    }
+});
+</pre>
+</body>
+</html>

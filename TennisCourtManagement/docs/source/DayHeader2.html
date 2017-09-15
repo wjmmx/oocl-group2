@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-view-DayHeader'>/**
+</span> * This is the header area container within the day and week views where all-day events are displayed.
+ * Normally you should not need to use this class directly -- instead you should use {@link Extensible.calendar.view.Day DayView}
+ * which aggregates this class and the {@link Extensible.calendar.view.DayBody DayBodyView} into the single unified view
+ * presented by {@link Extensible.calendar.CalendarPanel CalendarPanel}
+ */
+Ext.define(&#39;Extensible.calendar.view.DayHeader&#39;, {
+    extend: &#39;Extensible.calendar.view.Month&#39;,
+    alias: &#39;widget.extensible.dayheaderview&#39;,
+
+    requires: [
+        &#39;Extensible.calendar.template.DayHeader&#39;
+    ],
+
+<span id='Extensible-calendar-view-DayHeader-property-weekCount'>    // private configs
+</span>    weekCount: 1,
+<span id='Extensible-calendar-view-DayHeader-property-dayCount'>    dayCount: 1,
+</span><span id='Extensible-calendar-view-DayHeader-property-allDayOnly'>    allDayOnly: true,
+</span><span id='Extensible-calendar-view-DayHeader-cfg-monitorResize'>    monitorResize: false,
+</span><span id='Extensible-calendar-view-DayHeader-property-isHeaderView'>    isHeaderView: true,
+</span>
+    // The event is declared in MonthView but we&#39;re just overriding the docs:
+<span id='Extensible-calendar-view-DayHeader-event-dayclick'>    /**
+</span>     * @event dayclick
+     * Fires after the user clicks within the view container and not on an event element. This is a cancelable event, so
+     * returning false from a handler will cancel the click without displaying the event editor view. This could be useful
+     * for validating that a user can only create events on certain days.
+     * @param {Extensible.calendar.view.DayHeader} this
+     * @param {Date} dt The date/time that was clicked on
+     * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the
+     * DayHeaderView always return true for this param.
+     * @param {Ext.Element} el The Element that was clicked on
+     */
+
+    afterRender: function() {
+        if(!this.tpl) {
+            this.tpl = Ext.create(&#39;Extensible.calendar.template.DayHeader&#39;, {
+                id: this.id,
+                showTodayText: this.showTodayText,
+                todayText: this.todayText,
+                showTime: this.showTime
+            });
+        }
+        this.tpl.compile();
+        this.addCls(&#39;ext-cal-day-header&#39;);
+
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-view-DayHeader-method-forceSize'>    forceSize: Ext.emptyFn,
+</span>
+<span id='Extensible-calendar-view-DayHeader-method-refresh'>    refresh: function(reloadData) {
+</span>        Extensible.log(&#39;refresh (DayHeaderView)&#39;);
+        this.callParent(arguments);
+        this.recalcHeaderBox();
+    },
+
+<span id='Extensible-calendar-view-DayHeader-method-recalcHeaderBox'>    recalcHeaderBox: function() {
+</span>        var tbl = this.el.down(&#39;.ext-cal-evt-tbl&#39;),
+            h = tbl.getHeight();
+
+        this.el.setHeight(h+7);
+
+        // These should be auto-height, but since that does not work reliably
+        // across browser / doc type, we have to size them manually
+        this.el.down(&#39;.ext-cal-hd-ad-inner&#39;).setHeight(h+5);
+        this.el.down(&#39;.ext-cal-bg-tbl&#39;).setHeight(h+5);
+    },
+
+<span id='Extensible-calendar-view-DayHeader-method-moveNext'>    moveNext: function() {
+</span>        return this.moveDays(this.dayCount, false);
+    },
+
+<span id='Extensible-calendar-view-DayHeader-method-movePrev'>    movePrev: function() {
+</span>        return this.moveDays(-this.dayCount, false);
+    },
+
+<span id='Extensible-calendar-view-DayHeader-method-onClick'>    onClick: function(e, t) {
+</span>        var el = e.getTarget(&#39;td&#39;, 3);
+
+        if (el) {
+            if (el.id &amp;&amp; el.id.indexOf(this.dayElIdDelimiter) &gt; -1) {
+                var parts = el.id.split(this.dayElIdDelimiter),
+                    dt = parts[parts.length-1],
+                    parsedDate = Ext.Date.parseDate(dt + &#39; 12:00&#39;, &#39;Ymd G:i&#39;)
+
+                this.onDayClick(parsedDate, true, Ext.get(this.getDayId(dt, true)));
+                return;
+            }
+        }
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-view-DayHeader-method-isActiveView'>    /**
+</span>     * @protected
+     */
+    isActiveView: function() {
+        var calendarPanel = this.ownerCalendarPanel;
+        return (calendarPanel &amp;&amp; calendarPanel.getActiveView().isDayView);
+    }
+});
+</pre>
+</body>
+</html>

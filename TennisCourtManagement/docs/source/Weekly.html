@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-form-recurrence-option-Weekly'>/**
+</span> * The widget that represents the weekly recurrence options of an RRULE.
+ */
+Ext.define(&#39;Extensible.form.recurrence.option.Weekly&#39;, {
+    extend: &#39;Extensible.form.recurrence.AbstractOption&#39;,
+    alias: &#39;widget.extensible.recurrence-weekly&#39;,
+    
+    requires: [
+        &#39;Ext.form.field.Checkbox&#39;, // should be required by CheckboxGroup but isn&#39;t
+        &#39;Ext.form.CheckboxGroup&#39;,
+        &#39;Extensible.form.recurrence.Parser&#39;
+    ],
+
+<span id='Extensible-form-recurrence-option-Weekly-cfg-startDay'>    /**
+</span>     * @cfg {Number} startDay
+     * The 0-based index for the day on which the calendar week begins (0=Sunday, which is the default)
+     */
+    startDay: 0,
+
+<span id='Extensible-form-recurrence-option-Weekly-property-dayValueDelimiter'>    dayValueDelimiter: &#39;,&#39;,
+</span>    
+<span id='Extensible-form-recurrence-option-Weekly-property-cls'>    cls: &#39;extensible-recur-weekly&#39;,
+</span>
+<span id='Extensible-form-recurrence-option-Weekly-property-strings'>    strings: {
+</span>        on: &#39;on&#39;
+    },
+
+<span id='Extensible-form-recurrence-option-Weekly-method-getCheckboxGroupItems'>    /**
+</span>     * Creates the item configuration for the checkbox group. Takes into account the week start day.
+     * For example:
+     *		[
+     *			{ boxLabel: &#39;Sun&#39;, name: &#39;SU&#39;, id: this.id + &#39;-SU&#39; },
+     *			{ boxLabel: &#39;Mon&#39;, name: &#39;MO&#39;, id: this.id + &#39;-MO&#39; },
+     *			{ boxLabel: &#39;Tue&#39;, name: &#39;TU&#39;, id: this.id + &#39;-TU&#39; },
+     *			{ boxLabel: &#39;Wed&#39;, name: &#39;WE&#39;, id: this.id + &#39;-WE&#39; },
+     *			{ boxLabel: &#39;Thu&#39;, name: &#39;TH&#39;, id: this.id + &#39;-TH&#39; },
+     *			{ boxLabel: &#39;Fri&#39;, name: &#39;FR&#39;, id: this.id + &#39;-FR&#39; },
+     *			{ boxLabel: &#39;Sat&#39;, name: &#39;SA&#39;, id: this.id + &#39;-SA&#39; }
+     *		];
+     * @return {Array}
+     */
+    getCheckboxGroupItems: function() {
+        var weekdaysId = Extensible.form.recurrence.Parser.byDayNames,
+            weekdaysText = Extensible.form.recurrence.Parser.strings.dayNamesShortByIndex,
+            checkboxArray = [],
+            i = this.startDay;
+
+        for (var n=0; n&lt;7; n++) {
+            checkboxArray[n] = {boxLabel: weekdaysText[i], name: weekdaysId[i], id: this.id + &#39;-&#39; + weekdaysId[i]};
+            i = i === 6 ? 0 : i+1;
+        }
+        return checkboxArray;
+    },
+
+
+<span id='Extensible-form-recurrence-option-Weekly-method-getItemConfigs'>    getItemConfigs: function() {
+</span>        var id = this.id;
+
+        return [{
+            xtype: &#39;label&#39;,
+            text: this.strings.on + &#39;:&#39;
+        },{
+            xtype: &#39;checkboxgroup&#39;,
+            itemId: id + &#39;-days&#39;,
+            flex: 1,
+            items: this.getCheckboxGroupItems(),
+            listeners: {
+                &#39;change&#39;: Ext.bind(this.onSelectionChange, this)
+            }
+        }];
+    },
+    
+<span id='Extensible-form-recurrence-option-Weekly-method-initValue'>    initValue: function() {
+</span>        this.callParent(arguments);
+        
+        if (!this.value) {
+            this.selectByDate();
+        }
+    },
+    
+<span id='Extensible-form-recurrence-option-Weekly-method-initRefs'>    initRefs: function() {
+</span>        this.daysCheckboxGroup = this.down(&#39;#&#39; + this.id + &#39;-days&#39;);
+    },
+    
+<span id='Extensible-form-recurrence-option-Weekly-method-onSelectionChange'>    onSelectionChange: function(field, value, oldValue) {
+</span>        this.checkChange();
+        this.updateLabel();
+    },
+    
+<span id='Extensible-form-recurrence-option-Weekly-method-selectByDate'>    selectByDate: function(dt) {
+</span>        var day = Ext.Date.format(dt || this.getStartDate(), &#39;D&#39;).substring(0,2).toUpperCase();
+        this.setValue(&#39;BYDAY=&#39; + day);
+    },
+    
+<span id='Extensible-form-recurrence-option-Weekly-method-clearValue'>    clearValue: function() {
+</span>        this.value = undefined;
+        
+        if (this.daysCheckboxGroup) {
+            this.daysCheckboxGroup.setValue({
+                SU:0, MO:0, TU:0, WE:0, TH:0, FR:0, SA:0
+            });
+        }
+    },
+    
+<span id='Extensible-form-recurrence-option-Weekly-method-getValue'>    getValue: function() {
+</span>        var me = this;
+        
+        if (me.daysCheckboxGroup) {
+            // Checkbox group value will look like {MON:&quot;on&quot;, TUE:&quot;on&quot;, FRI:&quot;on&quot;}
+            var fieldValue = me.daysCheckboxGroup.getValue(),
+                days = [],
+                property;
+            
+            for (property in fieldValue) {
+                if (fieldValue.hasOwnProperty(property)) {
+                    // Push the name (&#39;MON&#39;) not the value (&#39;on&#39;)
+                    days.push(property);
+                }
+            }
+            return days.length &gt; 0 ? &#39;BYDAY=&#39; + days.join(me.dayValueDelimiter) : &#39;&#39;;
+        }
+        return &#39;&#39;;
+    },
+    
+<span id='Extensible-form-recurrence-option-Weekly-method-setValue'>    setValue: function(v) {
+</span>        var me = this;
+        
+        if (!me.preSetValue(v, me.daysCheckboxGroup)) {
+            return me;
+        }
+        // Clear all checkboxes
+        me.daysCheckboxGroup.setValue(null);
+        if (!v) {
+            return me;
+        }
+        var options = Ext.isArray(v) ? v : v.split(me.optionDelimiter),
+            compositeValue = {},
+            parts, days;
+
+        Ext.each(options, function(option) {
+            parts = option.split(&#39;=&#39;);
+            
+            if (parts[0] === &#39;BYDAY&#39;) {
+                days = parts[1].split(me.dayValueDelimiter);
+                    
+                Ext.each(days, function(day) {
+                    compositeValue[day] = true;
+                }, me);
+                
+                me.daysCheckboxGroup.setValue(compositeValue);
+                return;
+            }
+        }, me);
+        
+        return me;
+    }
+});</pre>
+</body>
+</html>

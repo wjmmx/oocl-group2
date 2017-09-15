@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-form-recurrence-FrequencyCombo'>/**
+</span> * The widget used to choose the frequency of recurrence. While this could be created
+ * as a standalone widget, it is typically created automatically as part of a
+ * Extensible.form.recurrence.Fieldset and does not normally need to be configured directly.
+ */
+Ext.define(&#39;Extensible.form.recurrence.FrequencyCombo&#39;, {
+    extend: &#39;Ext.form.field.ComboBox&#39;,
+    alias: &#39;widget.extensible.recurrence-frequency&#39;,
+    
+    requires: [
+        &#39;Ext.data.ArrayStore&#39;,
+        &#39;Extensible.form.recurrence.Parser&#39;
+    ],
+    
+<span id='Extensible-form-recurrence-FrequencyCombo-property-fieldLabel'>    fieldLabel: &#39;Repeats&#39;,
+</span><span id='Extensible-form-recurrence-FrequencyCombo-property-queryMode'>    queryMode: &#39;local&#39;,
+</span><span id='Extensible-form-recurrence-FrequencyCombo-property-triggerAction'>    triggerAction: &#39;all&#39;,
+</span><span id='Extensible-form-recurrence-FrequencyCombo-property-forceSelection'>    forceSelection: true,
+</span><span id='Extensible-form-recurrence-FrequencyCombo-property-displayField'>    displayField: &#39;pattern&#39;,
+</span><span id='Extensible-form-recurrence-FrequencyCombo-property-valueField'>    valueField: &#39;id&#39;,
+</span><span id='Extensible-form-recurrence-FrequencyCombo-property-cls'>    cls: &#39;extensible-recur-frequency&#39;,
+</span>    
+<span id='Extensible-form-recurrence-FrequencyCombo-method-initComponent'>    initComponent: function() {
+</span>        var me = this;
+        
+<span id='Extensible-form-recurrence-FrequencyCombo-event-frequencychange'>        /**
+</span>         * @event frequencychange
+         * Fires when a frequency list item is selected.
+         * @param {Extensible.form.recurrence.Combo} combo This combo box
+         * @param {String} value The selected frequency value (one of the names
+         * from {@link #frequencyOptions}, e.g. &#39;DAILY&#39;)
+         */
+        me.addEvents(&#39;frequencychange&#39;);
+        
+        var freq = Extensible.form.recurrence.Parser.strings.frequency;
+        
+<span id='Extensible-form-recurrence-FrequencyCombo-cfg-frequencyOptions'>        /**
+</span>         * @cfg {Array} frequencyOptions
+         * An array of arrays, each containing the name/value pair that defines a recurring
+         * frequency option supported by the frequency combo. This array is bound to the underlying
+         * {@link Ext.data.ArrayStore store} to provide the combo list items. The string descriptions
+         * are defined in the {@link Extensible.form.recurrence.Parser#strings} config.
+         * Defaults to:
+         *
+         *		[
+         *			[&#39;NONE&#39;, &#39;Does not repeat&#39;],
+         *			[&#39;DAILY&#39;, &#39;Daily&#39;],
+         *			[&#39;WEEKDAYS&#39;, &#39;Every weekday (Mon-Fri)&#39;],
+         *			[&#39;WEEKLY&#39;, &#39;Weekly&#39;],
+         *			[&#39;MONTHLY&#39;, &#39;Monthly&#39;],
+         *			[&#39;YEARLY&#39;, &#39;Yearly&#39;]
+         *		]
+         */
+        me.frequencyOptions = me.frequencyOptions || [
+            [&#39;NONE&#39;,     freq.none],
+            [&#39;DAILY&#39;,    freq.daily],
+            [&#39;WEEKDAYS&#39;, freq.weekdays],
+            [&#39;WEEKLY&#39;,   freq.weekly],
+            [&#39;MONTHLY&#39;,  freq.monthly],
+            [&#39;YEARLY&#39;,   freq.yearly]
+        ];
+        
+        me.store = me.store || Ext.create(&#39;Ext.data.ArrayStore&#39;, {
+            fields: [&#39;id&#39;, &#39;pattern&#39;],
+            idIndex: 0,
+            data: me.frequencyOptions
+        });
+        
+        me.on(&#39;select&#39;, me.onSelect, me);
+        
+        me.callParent(arguments);
+    },
+    
+<span id='Extensible-form-recurrence-FrequencyCombo-method-onSelect'>    onSelect: function(combo, records) {
+</span>        this.fireEvent(&#39;frequencychange&#39;, records[0].data.id);
+    }
+});</pre>
+</body>
+</html>

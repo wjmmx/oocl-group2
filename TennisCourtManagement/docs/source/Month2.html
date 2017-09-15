@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-view-Month'>/**
+</span> * Displays a calendar view by month. This class does not usually need ot be used directly as you can
+ * use a {@link Extensible.calendar.CalendarPanel CalendarPanel} to manage multiple calendar views at once including
+ * the month view.
+ */
+Ext.define(&#39;Extensible.calendar.view.Month&#39;, {
+    extend: &#39;Extensible.calendar.view.AbstractCalendar&#39;,
+    alias: &#39;widget.extensible.monthview&#39;,
+
+    requires: [
+        &#39;Ext.XTemplate&#39;,
+        &#39;Ext.TaskManager&#39;,
+        &#39;Extensible.calendar.template.Month&#39;,
+        &#39;Extensible.calendar.util.WeekEventRenderer&#39;,
+        &#39;Extensible.calendar.view.MonthDayDetail&#39;
+    ],
+
+<span id='Extensible-calendar-view-Month-cfg-moreText'>    /**
+</span>     * @cfg {String} moreText
+     * **Deprecated.** Please override {@link #getMoreText} instead.
+     *
+     * The text to display in a day box when there are more events than can be displayed and a link is provided to
+     * show a popup window with all events for that day (defaults to &#39;+{0} more...&#39;, where {0} will be
+     * replaced by the number of additional events that are not currently displayed for the day).
+     * @deprecated
+     */
+    moreText: &#39;+{0} more...&#39;,
+<span id='Extensible-calendar-view-Month-cfg-detailsTitleDateFormat'>    /**
+</span>     * @cfg {String} detailsTitleDateFormat
+     * The date format for the title of the details panel that shows when there are hidden events and the &quot;more&quot; link
+     * is clicked (defaults to &#39;F j&#39;).
+     */
+    detailsTitleDateFormat: &#39;F j&#39;,
+<span id='Extensible-calendar-view-Month-cfg-showTime'>    /**
+</span>     * @cfg {Boolean} showTime
+     * True to display the current time in today&#39;s box in the calendar, false to not display it (defaults to true)
+     */
+    showTime: true,
+<span id='Extensible-calendar-view-Month-cfg-showTodayText'>    /**
+</span>     * @cfg {Boolean} showTodayText
+     * True to display the {@link #todayText} string in today&#39;s box in the calendar, false to not display it
+     * (defaults to true)
+     */
+    showTodayText: true,
+<span id='Extensible-calendar-view-Month-cfg-showHeader'>    /**
+</span>     * @cfg {Boolean} showHeader
+     * True to display a header beneath the navigation bar containing the week names above each week&#39;s column, false
+     * not to show it and instead display the week names in the first row of days in the calendar (defaults to false).
+     */
+    showHeader: false,
+<span id='Extensible-calendar-view-Month-cfg-showWeekLinks'>    /**
+</span>     * @cfg {Boolean} showWeekLinks
+     * True to display an extra column before the first day in the calendar that links to the
+     * {@link Extensible.calendar.view.Week view} for each individual week, false to not show it (defaults to false).
+     * If true, the week links can also contain the week number depending on the value of {@link #showWeekNumbers}.
+     */
+    showWeekLinks: false,
+<span id='Extensible-calendar-view-Month-cfg-showWeekNumbers'>    /**
+</span>     * @cfg {Boolean} showWeekNumbers
+     * True to show the week number for each week in the calendar in the week link column, false to show nothing
+     * (defaults to false). Note that if {@link #showWeekLinks} is false this config will have no affect even if true.
+     */
+    showWeekNumbers: false,
+<span id='Extensible-calendar-view-Month-cfg-weekLinkOverClass'>    /**
+</span>     * @cfg {String} weekLinkOverClass
+     * The CSS class name applied when the mouse moves over a week link element (only applies when
+     * {@link #showWeekLinks} is true, defaults to &#39;ext-week-link-over&#39;).
+     */
+    weekLinkOverClass: &#39;ext-week-link-over&#39;,
+<span id='Extensible-calendar-view-Month-cfg-morePanelMinWidth'>    /**
+</span>     * @cfg {Number} morePanelMinWidth
+     * When there are more events in a given day than can be displayed in the calendar view, the extra events
+     * are hidden and a &quot;{@link #getMoreText more events}&quot; link is displayed. When clicked, the link pops up a
+     * detail panel that displays all events for that day. By default the panel will be the same width as the day
+     * box, but this config allows you to set the minimum width of the panel in the case where the width
+     * of the day box is too narrow for the events to be easily readable (defaults to 220 pixels).
+     */
+    morePanelMinWidth: 220,
+
+<span id='Extensible-calendar-view-Month-property-daySelector'>    //private properties -- do not override:
+</span>    daySelector: &#39;.ext-cal-day&#39;,
+<span id='Extensible-calendar-view-Month-property-moreSelector'>    moreSelector: &#39;.ext-cal-ev-more&#39;,
+</span><span id='Extensible-calendar-view-Month-property-weekLinkSelector'>    weekLinkSelector: &#39;.ext-cal-week-link&#39;,
+</span><span id='Extensible-calendar-view-Month-property-dayCount'><span id='Extensible-calendar-view-Month-property-weekCount'>    weekCount: -1, // defaults to auto by month
+</span></span>    dayCount: 7,
+<span id='Extensible-calendar-view-Month-property-moreElIdDelimiter'>    moreElIdDelimiter: &#39;-more-&#39;,
+</span><span id='Extensible-calendar-view-Month-property-weekLinkIdDelimiter'>    weekLinkIdDelimiter: &#39;ext-cal-week-&#39;,
+</span>
+<span id='Extensible-calendar-view-Month-method-initComponent'>    initComponent: function() {
+</span>        this.callParent(arguments);
+
+        this.addEvents({
+<span id='Extensible-calendar-view-Month-event-dayclick'>            /**
+</span>             * @event dayclick
+             * Fires after the user clicks within the view container and not on an event element. This is a
+             * cancelable event, so returning false from a handler will cancel the click without displaying the event
+             * editor view. This could be useful for validating that a user can only create events on certain days.
+             * @param {Extensible.calendar.view.Month} this
+             * @param {Date} dt The date/time that was clicked on
+             * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks
+             * within the MonthView always return true for this param.
+             * @param {Ext.Element} el The Element that was clicked on
+             */
+            dayclick: true,
+<span id='Extensible-calendar-view-Month-event-weekclick'>            /**
+</span>             * @event weekclick
+             * Fires after the user clicks within a week link (when {@link #showWeekLinks is true)
+             * @param {Extensible.calendar.view.Month} this
+             * @param {Date} dt The start date of the week that was clicked on
+             */
+            weekclick: true,
+<span id='Extensible-calendar-view-Month-property-dayover'>    /**
+</span>     * @protected
+     */
+            dayover: true,
+<span id='Extensible-calendar-view-Month-property-dayout'>    /**
+</span>     * @protected
+     */
+            dayout: true
+        });
+    },
+
+<span id='Extensible-calendar-view-Month-method-initDD'>    initDD: function() {
+</span>        var cfg = {
+            view: this,
+            createText: this.ddCreateEventText,
+            copyText: this.ddCopyEventText,
+            moveText: this.ddMoveEventText,
+            ddGroup: this.ddGroup || this.id+&#39;-MonthViewDD&#39;
+        };
+
+        this.dragZone = Ext.create(&#39;Extensible.calendar.dd.DragZone&#39;, this.el, cfg);
+        this.dropZone = Ext.create(&#39;Extensible.calendar.dd.DropZone&#39;, this.el, cfg);
+    },
+
+<span id='Extensible-calendar-view-Month-method-onDestroy'>    onDestroy: function() {
+</span>        Ext.destroy(this.ddSelector);
+        Ext.destroy(this.dragZone);
+        Ext.destroy(this.dropZone);
+
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-view-Month-method-afterRender'>    afterRender: function() {
+</span>        if(!this.tpl) {
+            this.tpl = Ext.create(&#39;Extensible.calendar.template.Month&#39;, {
+                id: this.id,
+                showTodayText: this.showTodayText,
+                todayText: this.todayText,
+                showTime: this.showTime,
+                showHeader: this.showHeader,
+                showWeekLinks: this.showWeekLinks,
+                showWeekNumbers: this.showWeekNumbers
+            });
+            this.tpl.compile();
+        }
+
+        this.addCls(&#39;ext-cal-monthview ext-cal-ct&#39;);
+
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-view-Month-method-onResize'>    onResize: function() {
+</span>        if (this.monitorResize) {
+            this.maxEventsPerDay = this.getMaxEventsPerDay();
+            this.refresh(false);
+        }
+    },
+
+<span id='Extensible-calendar-view-Month-method-forceSize'>    forceSize: function() {
+</span>        // Compensate for the week link gutter width if visible
+        if(this.showWeekLinks &amp;&amp; this.el) {
+            var hd = this.el.down(&#39;.ext-cal-hd-days-tbl&#39;),
+                bgTbl = this.el.select(&#39;.ext-cal-bg-tbl&#39;),
+                evTbl = this.el.select(&#39;.ext-cal-evt-tbl&#39;),
+                wkLinkW = this.el.down(&#39;.ext-cal-week-link&#39;).getWidth(),
+                w = this.el.getWidth()-wkLinkW;
+
+            hd.setWidth(w);
+            bgTbl.setWidth(w);
+            evTbl.setWidth(w);
+        }
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-view-Month-method-initClock'>    //private
+</span>    initClock: function() {
+        if(Ext.fly(this.id+&#39;-clock&#39;) !== null) {
+            this.prevClockDay = new Date().getDay();
+            if(this.clockTask) {
+                Ext.util.TaskManager.stop(this.clockTask);
+            }
+            this.clockTask = Ext.util.TaskManager.start({
+                run: function() {
+                    var el = Ext.fly(this.id+&#39;-clock&#39;),
+                        t = new Date();
+
+                    if(t.getDay() === this.prevClockDay) {
+                        if(el) {
+                            el.update(Ext.Date.format(t, Extensible.Date.use24HourTime ? &#39;G:i&#39; : &#39;g:ia&#39;));
+                        }
+                    }
+                    else{
+                        this.prevClockDay = t.getDay();
+                        this.moveTo(t);
+                    }
+                },
+                scope: this,
+                interval: 1000
+            });
+        }
+    },
+
+<span id='Extensible-calendar-view-Month-method-getMoreText'>    /**
+</span>     * Returns the text to display in a day box when there are more events than can be displayed and a link is
+     * provided to show a popup window with all events for that day (defaults to &#39;+{0} more...&#39;, where {0} will be
+     * replaced by the number of additional events that are not currently displayed for the day).
+     * @param {Integer} numEvents The number of events currently hidden from view
+     * @return {String} The text to display for the &quot;more&quot; link
+     */
+    getMoreText: function(numEvents) {
+        return this.moreText;
+    },
+
+<span id='Extensible-calendar-view-Month-method-getEventBodyMarkup'>    /**
+</span>     * @protected
+     */
+    getEventBodyMarkup: function() {
+        if(!this.eventBodyMarkup) {
+            this.eventBodyMarkup = [&#39;{Title}&#39;,
+                &#39;&lt;tpl if=&quot;_isReminder&quot;&gt;&#39;,
+                    &#39;&lt;i class=&quot;ext-cal-ic ext-cal-ic-rem&quot;&gt;&amp;#160;&lt;/i&gt;&#39;,
+                &#39;&lt;/tpl&gt;&#39;,
+                &#39;&lt;tpl if=&quot;_isRecurring&quot;&gt;&#39;,
+                    &#39;&lt;i class=&quot;ext-cal-ic ext-cal-ic-rcr&quot;&gt;&amp;#160;&lt;/i&gt;&#39;,
+                &#39;&lt;/tpl&gt;&#39;,
+                &#39;&lt;tpl if=&quot;spanLeft&quot;&gt;&#39;,
+                    &#39;&lt;i class=&quot;ext-cal-spl&quot;&gt;&amp;#160;&lt;/i&gt;&#39;,
+                &#39;&lt;/tpl&gt;&#39;,
+                &#39;&lt;tpl if=&quot;spanRight&quot;&gt;&#39;,
+                    &#39;&lt;i class=&quot;ext-cal-spr&quot;&gt;&amp;#160;&lt;/i&gt;&#39;,
+                &#39;&lt;/tpl&gt;&#39;
+            ].join(&#39;&#39;);
+        }
+        return this.eventBodyMarkup;
+    },
+
+<span id='Extensible-calendar-view-Month-method-getEventTemplate'>    /**
+</span>     * @protected
+     */
+    getEventTemplate: function() {
+        if(!this.eventTpl) {
+            var tpl, body = this.getEventBodyMarkup();
+
+            tpl = !(Ext.isIE || Ext.isOpera) ?
+                Ext.create(&#39;Ext.XTemplate&#39;,
+                    &#39;&lt;div class=&quot;{_extraCls} {spanCls} ext-cal-evt ext-cal-evr&quot;&gt;&#39;,
+                        body,
+                    &#39;&lt;/div&gt;&#39;
+                )
+                : Ext.create(&#39;Ext.XTemplate&#39;,
+                    &#39;&lt;tpl if=&quot;_renderAsAllDay&quot;&gt;&#39;,
+                        &#39;&lt;div class=&quot;{_extraCls} {spanCls} ext-cal-evt ext-cal-evo&quot;&gt;&#39;,
+                            &#39;&lt;div class=&quot;ext-cal-evm&quot;&gt;&#39;,
+                                &#39;&lt;div class=&quot;ext-cal-evi&quot;&gt;&#39;,
+                    &#39;&lt;/tpl&gt;&#39;,
+                    &#39;&lt;tpl if=&quot;!_renderAsAllDay&quot;&gt;&#39;,
+                        &#39;&lt;div class=&quot;{_extraCls} ext-cal-evt ext-cal-evr&quot;&gt;&#39;,
+                    &#39;&lt;/tpl&gt;&#39;,
+                    body,
+                    &#39;&lt;tpl if=&quot;_renderAsAllDay&quot;&gt;&#39;,
+                                &#39;&lt;/div&gt;&#39;,
+                            &#39;&lt;/div&gt;&#39;,
+                    &#39;&lt;/tpl&gt;&#39;,
+                        &#39;&lt;/div&gt;&#39;
+                );
+            tpl.compile();
+            this.eventTpl = tpl;
+        }
+        return this.eventTpl;
+    },
+
+<span id='Extensible-calendar-view-Month-method-getTemplateEventData'>    getTemplateEventData: function(evtData) {
+</span>        var M = Extensible.calendar.data.EventMappings,
+            extraClasses = [this.getEventSelectorCls(evtData[M.EventId.name])],
+            templateData = {},
+            colorCls = &#39;x-cal-default&#39;,
+            title = evtData[M.Title.name],
+            fmt = Extensible.Date.use24HourTime ? &#39;G:i &#39; : &#39;g:ia &#39;,
+            rec;
+
+        if (this.calendarStore &amp;&amp; evtData[M.CalendarId.name]) {
+            rec = this.calendarStore.findRecord(Extensible.calendar.data.CalendarMappings.CalendarId.name, evtData[M.CalendarId.name]);
+            if(rec) {
+                colorCls = &#39;x-cal-&#39; + rec.get(Extensible.calendar.data.CalendarMappings.ColorId.name);
+            }
+        }
+        colorCls += (evtData._renderAsAllDay ? &#39;-ad&#39; : &#39;&#39;);
+        extraClasses.push(colorCls);
+
+        if (evtData._renderAsAllDay) {
+            extraClasses.push(&#39;ext-evt-block&#39;);
+        }
+
+        if (this.getEventClass) {
+            rec = this.getEventRecord(evtData[M.EventId.name]);
+            var cls = this.getEventClass(rec, !!evtData._renderAsAllDay, templateData, this.store);
+            extraClasses.push(cls);
+        }
+
+        templateData._extraCls = extraClasses.join(&#39; &#39;);
+        templateData._isRecurring = M.RRule &amp;&amp; !!evtData[M.RRule.name];
+        templateData._isReminder = evtData[M.Reminder.name] &amp;&amp; evtData[M.Reminder.name] !== &#39;&#39;;
+        templateData.Title = (evtData[M.IsAllDay.name] ? &#39;&#39; : Ext.Date.format(evtData[M.StartDate.name], fmt)) +
+                (!title || title.length === 0 ? this.defaultEventTitleText : title);
+
+        return Ext.applyIf(templateData, evtData);
+    },
+
+<span id='Extensible-calendar-view-Month-method-refresh'>    refresh: function(reloadData) {
+</span>        Extensible.log(&#39;refresh (MonthView)&#39;);
+        if(this.detailPanel) {
+            this.detailPanel.hide();
+        }
+        if (!this.isHeaderView) {
+            this.maxEventsPerDay = this.getMaxEventsPerDay();
+        }
+        this.callParent(arguments);
+
+        if(this.showTime !== false) {
+            this.initClock();
+        }
+    },
+
+<span id='Extensible-calendar-view-Month-method-renderItems'>    renderItems: function() {
+</span>        Extensible.calendar.util.WeekEventRenderer.render({
+            eventGrid: this.allDayOnly ? this.allDayGrid : this.eventGrid,
+            viewStart: this.viewStart,
+            tpl: this.getEventTemplate(),
+            maxEventsPerDay: this.maxEventsPerDay,
+            viewId: this.id,
+            templateDataFn: Ext.bind(this.getTemplateEventData, this),
+            evtMaxCount: this.evtMaxCount,
+            weekCount: this.weekCount,
+            dayCount: this.dayCount,
+            getMoreText: Ext.bind(this.getMoreText, this)
+        });
+        this.fireEvent(&#39;eventsrendered&#39;, this);
+    },
+
+<span id='Extensible-calendar-view-Month-method-getDayEl'>    getDayEl: function(dt) {
+</span>        return Ext.get(this.getDayId(dt));
+    },
+
+<span id='Extensible-calendar-view-Month-method-getDayId'>    getDayId: function(dt) {
+</span>        if(Ext.isDate(dt)) {
+            dt = Ext.Date.format(dt, &#39;Ymd&#39;);
+        }
+        return this.id + this.dayElIdDelimiter + dt;
+    },
+
+<span id='Extensible-calendar-view-Month-method-getWeekIndex'>    getWeekIndex: function(dt) {
+</span>        var el = this.getDayEl(dt).up(&#39;.ext-cal-wk-ct&#39;);
+        return parseInt(el.id.split(&#39;-wk-&#39;)[1], 10);
+    },
+
+<span id='Extensible-calendar-view-Month-method-getDaySize'>    getDaySize: function(contentOnly) {
+</span>        var box = this.el.getBox(),
+            padding = this.getViewPadding(),
+            w = (box.width - padding.width) / this.dayCount,
+            h = (box.height - padding.height) / this.getWeekCount();
+
+        if(contentOnly) {
+            // measure last row instead of first in case text wraps in first row
+            var hd = this.el.select(&#39;.ext-cal-dtitle&#39;).last().parent(&#39;tr&#39;);
+            h = hd ? h-hd.getHeight(true) : h;
+        }
+        return {height: h, width: w};
+    },
+
+<span id='Extensible-calendar-view-Month-method-getEventHeight'>    getEventHeight: function() {
+</span>        if (!this.eventHeight) {
+            var evt = this.el.select(&#39;.ext-cal-evt&#39;).first();
+            if(evt) {
+                this.eventHeight = evt.parent(&#39;td&#39;).getHeight();
+            }
+            else {
+                return 16; // no events rendered, so try setting this.eventHeight again later
+            }
+        }
+        return this.eventHeight;
+    },
+
+<span id='Extensible-calendar-view-Month-method-getMaxEventsPerDay'>    getMaxEventsPerDay: function() {
+</span>        var dayHeight = this.getDaySize(true).height,
+            eventHeight = this.getEventHeight(),
+            max = Math.max(Math.floor((dayHeight - eventHeight) / eventHeight), 0);
+
+        return max;
+    },
+
+<span id='Extensible-calendar-view-Month-method-getViewPadding'>    getViewPadding: function(sides) {
+</span>        sides = sides || &#39;tlbr&#39;;
+
+        var top = sides.indexOf(&#39;t&#39;) &gt; -1,
+            left = sides.indexOf(&#39;l&#39;) &gt; -1,
+            right = sides.indexOf(&#39;r&#39;) &gt; -1,
+            height = this.showHeader &amp;&amp; top ? this.el.select(&#39;.ext-cal-hd-days-tbl&#39;).first().getHeight() : 0,
+            width = 0;
+
+        if (this.isHeaderView) {
+            if (left) {
+                width = this.el.select(&#39;.ext-cal-gutter&#39;).first().getWidth();
+            }
+            if (right) {
+                width += this.el.select(&#39;.ext-cal-gutter-rt&#39;).first().getWidth();
+            }
+        }
+        else if (this.showWeekLinks &amp;&amp; left) {
+            width = this.el.select(&#39;.ext-cal-week-link&#39;).first().getWidth();
+        }
+
+        return {
+            height: height,
+            width: width
+        };
+    },
+
+<span id='Extensible-calendar-view-Month-method-getDayAt'>    getDayAt: function(x, y) {
+</span>        var box = this.el.getBox(),
+            padding = this.getViewPadding(&#39;tl&#39;), // top/left only since we only want the xy offsets
+            daySize = this.getDaySize(),
+            dayL = Math.floor(((x - box.x - padding.width) / daySize.width)),
+            dayT = Math.floor(((y - box.y - padding.height) / daySize.height)),
+            days = (dayT * 7) + dayL,
+            dt = Extensible.Date.add(this.viewStart, {days: days});
+
+        return {
+            date: dt,
+            el: this.getDayEl(dt)
+        };
+    },
+
+<span id='Extensible-calendar-view-Month-method-moveNext'>    /**
+</span>     * @protected
+     */
+    moveNext: function() {
+        return this.moveMonths(1, true);
+    },
+
+<span id='Extensible-calendar-view-Month-method-movePrev'>    /**
+</span>     * @protected
+     */
+    movePrev: function() {
+        return this.moveMonths(-1, true);
+    },
+
+<span id='Extensible-calendar-view-Month-method-onInitDrag'>    onInitDrag: function() {
+</span>        this.callParent(arguments);
+
+        Ext.select(this.daySelector).removeCls(this.dayOverClass);
+        if(this.detailPanel) {
+            this.detailPanel.hide();
+        }
+    },
+
+<span id='Extensible-calendar-view-Month-method-onMoreClick'>    onMoreClick: function(dt) {
+</span>        if(!this.detailPanel) {
+            this.detailPanel = Ext.create(&#39;Ext.Panel&#39;, {
+                id: this.id+&#39;-details-panel&#39;,
+                title: Ext.Date.format(dt, this.detailsTitleDateFormat),
+                layout: &#39;fit&#39;,
+                floating: true,
+                renderTo: Ext.getBody(),
+                hideMode: &#39;offsets&#39;,
+                tools: [{
+                    type: &#39;close&#39;,
+                    handler: function(e, t, p) {
+                        p.ownerCt.hide();
+                    }
+                }],
+                items: {
+                    xtype: &#39;extensible.monthdaydetailview&#39;,
+                    id: this.id+&#39;-details-view&#39;,
+                    date: dt,
+                    view: this,
+                    store: this.store,
+                    calendarStore: this.calendarStore,
+                    listeners: {
+                        &#39;eventsrendered&#39;: Ext.bind(this.onDetailViewUpdated, this)
+                    }
+                }
+            });
+
+            if(this.enableContextMenus &amp;&amp; this.readOnly !== true) {
+                this.detailPanel.body.on(&#39;contextmenu&#39;, this.onContextMenu, this);
+            }
+        }
+        else{
+            this.detailPanel.setTitle(Ext.Date.format(dt, this.detailsTitleDateFormat));
+        }
+        this.detailPanel.getComponent(this.id+&#39;-details-view&#39;).update(dt);
+    },
+
+<span id='Extensible-calendar-view-Month-method-onDetailViewUpdated'>    onDetailViewUpdated: function(view, dt, numEvents) {
+</span>        var p = this.detailPanel,
+            dayEl = this.getDayEl(dt),
+            box = dayEl.getBox(),
+            innerTplHeight = p.el.down(&#39;.ext-cal-mdv&#39;).getHeight(),
+            header = p.getDockedItems(&#39;header&#39;)[0],
+            frameSize = p.frameSize || {top:0, bottom:0},
+            frameHeight = frameSize.top + frameSize.bottom + header.getHeight(),
+            bodyHeight = innerTplHeight + frameHeight + 5,
+            documentBodyHeight = Ext.getBody().getHeight() - 20,
+            calculatedHeight = Math.min(bodyHeight, documentBodyHeight);
+
+        // Check for overflow first -- if overflow is needed the scrollbar
+        // will affect the body width in some browsers
+        if (calculatedHeight === documentBodyHeight) {
+            p.body.addCls(&#39;ext-cal-overflow-y&#39;);
+        }
+        else {
+            p.body.removeCls(&#39;ext-cal-overflow-y&#39;);
+        }
+        // Now set the new calculated panel dimensions
+        p.setWidth(Math.max(box.width, this.morePanelMinWidth));
+        p.setHeight(calculatedHeight);
+
+        p.show();
+        p.getPositionEl().alignTo(dayEl, &#39;t-t?&#39;);
+    },
+
+<span id='Extensible-calendar-view-Month-method-onHide'>    onHide: function() {
+</span>        this.callParent(arguments);
+
+        if(this.detailPanel) {
+            this.detailPanel.hide();
+        }
+    },
+
+<span id='Extensible-calendar-view-Month-method-onClick'>    onClick: function(e, t) {
+</span>        if(this.detailPanel) {
+            this.detailPanel.hide();
+        }
+
+        var el = e.getTarget(this.moreSelector, 3),
+            parsedDate,
+            dt;
+
+        if (el) {
+            dt = el.id.split(this.moreElIdDelimiter)[1];
+            parsedDate = Ext.Date.parseDate(dt + &#39; 12:00&#39;, &#39;Ymd G:i&#39;);
+            this.onMoreClick(parsedDate);
+            return;
+        }
+
+        el = e.getTarget(this.weekLinkSelector, 3);
+
+        if (el) {
+            dt = el.id.split(this.weekLinkIdDelimiter)[1];
+            parsedDate = Ext.Date.parseDate(dt + &#39; 12:00&#39;, &#39;Ymd G:i&#39;);
+            this.fireEvent(&#39;weekclick&#39;, this, parsedDate);
+            return;
+        }
+
+        if (Extensible.calendar.view.Month.superclass.onClick.apply(this, arguments)) {
+            // The superclass handled the click already so exit
+            return;
+        }
+
+        el = e.getTarget(&#39;td&#39;, 3);
+
+        if (el) {
+            if (el.id &amp;&amp; el.id.indexOf(this.dayElIdDelimiter) &gt; -1) {
+                var parts = el.id.split(this.dayElIdDelimiter);
+                dt = parts[parts.length-1],
+                parsedDate = Ext.Date.parseDate(dt + &#39; 12:00&#39;, &#39;Ymd G:i&#39;);
+
+                //this.fireEvent(&#39;dayclick&#39;, this, parsedDate, false, Ext.get(this.getDayId(dt)));
+                this.onDayClick(parsedDate, false, Ext.get(this.getDayId(dt)));
+                return;
+            }
+        }
+    },
+
+<span id='Extensible-calendar-view-Month-method-handleDayMouseEvent'>    handleDayMouseEvent: function(e, t, type) {
+</span>        var el = e.getTarget(this.weekLinkSelector, 3, true);
+        if(el) {
+            el[type === &#39;over&#39; ? &#39;addCls&#39; : &#39;removeCls&#39;](this.weekLinkOverClass);
+            return;
+        }
+        this.callParent(arguments);
+    },
+
+<span id='Extensible-calendar-view-Month-method-destroy'>    destroy: function() {
+</span>        this.callParent(arguments);
+
+        if(this.detailsPanel) {
+            this.detailPanel.body.un(&#39;contextmenu&#39;, this.onContextMenu, this);
+        }
+    }
+});
+</pre>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-gadget-CalendarListMenu'>/**
+</span> * A menu containing a {@link Extensible.calendar.util.ColorPicker color picker} for choosing
+ * calendar colors, as well as other calendar-specific options.
+ * 
+ * @private
+ */
+Ext.define(&#39;Extensible.calendar.gadget.CalendarListMenu&#39;, {
+    extend: &#39;Ext.menu.Menu&#39;,
+    alias: &#39;widget.extensible.calendarlistmenu&#39;,
+    
+    requires: [&#39;Extensible.calendar.util.ColorPicker&#39;],
+    
+<span id='Extensible-calendar-gadget-CalendarListMenu-cfg-hideOnClick'>    /**
+</span>     * @cfg {Boolean} hideOnClick
+     * False to continue showing the menu after a color is selected, defaults to true.
+     */
+    hideOnClick: true,
+<span id='Extensible-calendar-gadget-CalendarListMenu-cfg-ignoreParentClicks'>    /**
+</span>     * @cfg {Boolean} ignoreParentClicks
+     * True to ignore clicks on any item in this menu that is a parent item (displays a submenu)
+     * so that the submenu is not dismissed when clicking the parent item (defaults to true).
+     */
+    ignoreParentClicks: true,
+<span id='Extensible-calendar-gadget-CalendarListMenu-cfg-displayOnlyThisCalendarText'>    /**
+</span>     * @cfg {String} displayOnlyThisCalendarText
+     * The text to display for the &#39;Display only this calendar&#39; option in the menu.
+     */
+    displayOnlyThisCalendarText: &#39;Display only this calendar&#39;,
+<span id='Extensible-calendar-gadget-CalendarListMenu-cfg-calendarId'>    /**
+</span>     * @cfg {Number} calendarId
+     * The id of the calendar to be associated with this menu. This calendarId will be passed
+     * back with any events from this menu to identify the calendar to be acted upon. The calendar
+     * id can also be changed at any time after creation by calling {@link setCalendar}.
+     */
+    
+<span id='Extensible-calendar-gadget-CalendarListMenu-cfg-enableScrolling'>    /**
+</span>     * @cfg {Boolean} enableScrolling
+     * @hide
+     */
+    enableScrolling: false,
+<span id='Extensible-calendar-gadget-CalendarListMenu-cfg-maxHeight'>    /**
+</span>     * @cfg {Number} maxHeight
+     * @hide
+     */
+<span id='Extensible-calendar-gadget-CalendarListMenu-cfg-scrollIncrement'>    /**
+</span>     * @cfg {Number} scrollIncrement
+     * @hide
+     */
+<span id='Extensible-calendar-gadget-CalendarListMenu-event-click'>    /**
+</span>     * @event click
+     * @hide
+     */
+<span id='Extensible-calendar-gadget-CalendarListMenu-event-itemclick'>    /**
+</span>     * @event itemclick
+     * @hide
+     */
+    
+<span id='Extensible-calendar-gadget-CalendarListMenu-property-palette'>    /**
+</span>     * @property palette
+     * @type ColorPicker
+     * The {@link Extensible.calendar.util.ColorPicker ColorPicker} instance for this CalendarListMenu
+     */
+    
+    initComponent: function() {
+        this.addEvents(
+            &#39;showcalendar&#39;,
+            &#39;hidecalendar&#39;,
+            &#39;radiocalendar&#39;,
+            &#39;colorchange&#39;
+        );
+        
+        Ext.apply(this, {
+            plain: true,
+            items: [{
+                text: this.displayOnlyThisCalendarText,
+                iconCls: &#39;extensible-cal-icon-cal-show&#39;,
+                handler: Ext.bind(this.handleRadioCalendarClick, this)
+            }, &#39;-&#39;, {
+                xtype: &#39;extensible.calendarcolorpicker&#39;,
+                id: this.id + &#39;-calendar-color-picker&#39;,
+                handler: Ext.bind(this.handleColorSelect, this)
+            }]
+        });
+        
+        this.addClass(&#39;x-calendar-list-menu&#39;);
+        this.callParent(arguments);
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListMenu-method-afterRender'>    afterRender: function() {
+</span>        this.callParent(arguments);
+        
+        this.palette = this.down(&#39;#&#39; + this.id + &#39;-calendar-color-picker&#39;);
+        
+        if(this.colorId) {
+            this.palette.select(this.colorId, true);
+        }
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListMenu-method-handleRadioCalendarClick'>    handleRadioCalendarClick: function(e, t) {
+</span>        this.fireEvent(&#39;radiocalendar&#39;, this, this.calendarId);
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListMenu-method-handleColorSelect'>    handleColorSelect: function(cp, selColorId) {
+</span>        this.fireEvent(&#39;colorchange&#39;, this, this.calendarId, selColorId, this.colorId);
+        this.colorId = selColorId;
+        this.menuHide();
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListMenu-method-setCalendar'>    /**
+</span>     * Sets the calendar id and color id to be associated with this menu. This should be called each time the
+     * menu is shown relative to a new calendar.
+     * @param {Number} calendarId The id of the calendar to be associated
+     * @param {Number} colorId The id of the color to be pre-selected in the color palette
+     * @return {Extensible.calendar.gadget.CalendarListMenu} this
+     */
+    setCalendar: function(id, cid) {
+        this.calendarId = id;
+        this.colorId = cid;
+        
+        if(this.rendered) {
+            this.palette.select(cid, true);
+        }
+        return this;
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListMenu-method-menuHide'>    menuHide: function() {
+</span>        if(this.hideOnClick) {
+            this.hide();
+        }
+    }
+});</pre>
+</body>
+</html>

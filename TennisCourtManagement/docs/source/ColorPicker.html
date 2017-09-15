@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-util-ColorPicker'>/**
+</span> * Simple color picker class for choosing colors specifically for calendars. This is a lightly modified version
+ * of the default Ext color picker that is based on calendar ids rather than hex color codes so that the colors
+ * can be easily modified via CSS and automatically applied to calendars. The specific colors used by default are
+ * also chosen to provide good color contrast when displayed in calendars.
+ */
+Ext.define(&#39;Extensible.calendar.util.ColorPicker&#39;, {
+    extend: &#39;Ext.picker.Color&#39;,
+    alias: &#39;widget.extensible.calendarcolorpicker&#39;,
+    
+    requires: [&#39;Ext.XTemplate&#39;],
+    
+<span id='Extensible-calendar-util-ColorPicker-property-colorCount'>    colorCount: 32,
+</span>    
+<span id='Extensible-calendar-util-ColorPicker-cfg-handler'>    /**
+</span>     * @cfg {Function} handler
+     * Optional. A function that will handle the select event of this color picker.
+     * The handler is passed the following parameters:
+     * 
+     *	* picker : *ColorPicker* 
+     *		* The picker instance.
+     *	* colorId : *String* 
+     *		* The id that identifies the selected color and relates it to a calendar.
+     */
+    
+    constructor: function() {
+        this.renderTpl = [
+            &#39;&lt;tpl for=&quot;colors&quot;&gt;&#39;,
+                &#39;&lt;a href=&quot;#&quot; class=&quot;x-cal-{.}&quot; hidefocus=&quot;on&quot;&gt;&#39;,
+                    &#39;&lt;em&gt;&lt;span unselectable=&quot;on&quot;&gt;&amp;#160;&lt;/span&gt;&lt;/em&gt;&#39;,
+                &#39;&lt;/a&gt;&#39;,
+            &#39;&lt;/tpl&gt;&#39;
+        ];
+        
+        this.callParent(arguments);
+    },
+    
+<span id='Extensible-calendar-util-ColorPicker-method-initComponent'>    initComponent: function() {
+</span>        this.callParent(arguments);
+        
+        this.addCls(&#39;x-calendar-palette&#39;);
+            
+        if(this.handler) {
+            this.on(&#39;select&#39;, this.handler, this.scope || this, {
+                delegate: &#39;a&#39;
+            });
+        }
+        
+        this.colors = [];
+        for (var i=1; i&lt;=this.colorCount; i++) {
+            this.colors.push(i);
+        }
+    },
+    
+<span id='Extensible-calendar-util-ColorPicker-method-handleClick'>    handleClick: function(e, target) {
+</span>        e.preventDefault();
+        
+        var classNames = target.className.split(&#39; &#39;),
+            colorId;
+        
+        Ext.each(classNames, function(className) {
+            if (className.indexOf(&#39;x-cal-&#39;) &gt; -1) {
+                colorId = className.split(&#39;x-cal-&#39;)[1];
+                return false;
+            }
+        });
+        if (colorId) {
+            this.select(colorId);
+        }
+    },
+    
+<span id='Extensible-calendar-util-ColorPicker-method-select'>    /**
+</span>     * Selects the specified color in the palette (fires the {@link #select} event)
+     * @param {Number} colorId The id that identifies the selected color and relates it to a calendar
+     * @param {Boolean} suppressEvent (optional) True to stop the select event from firing. Defaults to &lt;tt&gt;false&lt;/tt&gt;.
+     */
+    select: function(colorId, suppressEvent) {
+        var me = this,
+            selectedCls = me.selectedCls,
+            value = me.value;
+            
+        if (!me.rendered) {
+            me.value = colorId;
+            return;
+        }
+        
+        if (colorId !== value || me.allowReselect) {
+            var el = me.el;
+
+            if (me.value) {
+                el.down(&#39;.x-cal-&#39; + value).removeCls(selectedCls);
+            }
+            el.down(&#39;.x-cal-&#39; + colorId).addCls(selectedCls);
+            me.value = colorId;
+            
+            if (suppressEvent !== true) {
+                me.fireEvent(&#39;select&#39;, me, colorId);
+            }
+        }
+    }
+});</pre>
+</body>
+</html>

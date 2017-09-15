@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+ * Not currently in use, may or may not be implemented...
+ */
+Extensible.calendar.form.field.AttendeeCombo = Ext.extend(Ext.ux.form.SuperBoxSelect, {
+    fieldLabel: &#39;Attendees&#39;,
+    name: &#39;attendees&#39;,
+    anchor:&#39;100%&#39;,
+    mode: &#39;local&#39;,
+    displayField: &#39;Name&#39;,
+    valueField: &#39;AttendeeId&#39;,
+    classField: &#39;cls&#39;,
+    styleField: &#39;style&#39;,
+    extraItemStyle: &#39;border-width:2px&#39;
+});
+
+Ext.reg(&#39;extensible.attendeecombo&#39;, Extensible.calendar.form.field.AttendeeCombo);
+</pre>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-form-field-ReminderCombo'>/**
+</span> * A custom combo used for choosing a reminder setting for an event.
+ * 
+ * This is pretty much a standard combo that is simply pre-configured for the options needed by the
+ * calendar components. The default configs are as follows:
+ *		width: 200,
+ *		fieldLabel: &#39;Reminder&#39;,
+ *		queryMode: &#39;local&#39;,
+ *		triggerAction: &#39;all&#39;,
+ *		forceSelection: true,
+ *		displayField: &#39;desc&#39;,
+ *		valueField: &#39;value&#39;,
+ *		noneText: &#39;None&#39;,
+ *		atStartTimeText: &#39;At start time&#39;,
+ *		reminderValueFormat: &#39;{0} {1} before start&#39;
+ * To customize the descriptions in the dropdown list override the following methods:
+ * {@link #getMinutesText}, {@link #getHoursText}, {@link #getDaysText} and {@link #getWeeksText}.
+ */
+Ext.define(&#39;Extensible.calendar.form.field.ReminderCombo&#39;, {
+    extend: &#39;Ext.form.field.ComboBox&#39;,
+    alias: &#39;widget.extensible.remindercombo&#39;,
+    
+    requires: [&#39;Ext.data.ArrayStore&#39;],
+    
+<span id='Extensible-calendar-form-field-ReminderCombo-property-fieldLabel'>    fieldLabel: &#39;Reminder&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-queryMode'>    queryMode: &#39;local&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-triggerAction'>    triggerAction: &#39;all&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-forceSelection'>    forceSelection: true,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-displayField'>    displayField: &#39;desc&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-valueField'>    valueField: &#39;value&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-noneText'>    noneText: &#39;None&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-atStartTimeText'>    atStartTimeText: &#39;At start time&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-reminderValueFormat'>    reminderValueFormat: &#39;{0} {1} before start&#39;,
+</span>    
+<span id='Extensible-calendar-form-field-ReminderCombo-property-minutesText'>    // the following are all deprecated in favor of the corresponding get* template methods.
+</span>    // they are still here only for backwards-compatibility and will be removed in a future release.
+    minutesText: &#39;minutes&#39;,
+<span id='Extensible-calendar-form-field-ReminderCombo-property-hourText'>    hourText: &#39;hour&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-hoursText'>    hoursText: &#39;hours&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-dayText'>    dayText: &#39;day&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-daysText'>    daysText: &#39;days&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-weekText'>    weekText: &#39;week&#39;,
+</span><span id='Extensible-calendar-form-field-ReminderCombo-property-weeksText'>    weeksText: &#39;weeks&#39;,
+</span>    
+<span id='Extensible-calendar-form-field-ReminderCombo-method-initComponent'>    initComponent: function() {
+</span>        this.store = this.store || Ext.create(&#39;Ext.data.ArrayStore&#39;, {
+            fields: [&#39;value&#39;, &#39;desc&#39;],
+            idIndex: 0,
+            data: this.getValueList()
+        });
+        
+        this.callParent(arguments);
+    },
+    
+<span id='Extensible-calendar-form-field-ReminderCombo-method-getValueList'>    /**
+</span>     * Returns the list of reminder values used as the contents of the combo list. This method is provided so that
+     * the value list can be easily overridden as needed.
+     * @return {Array} A 2-dimensional array of type [{String}, {String}] which contains the value and description
+     * respectively of each item in the combo list. By default the value is the number of minutes for the selected
+     * time value (e.g., value 120 == &#39;2 hours&#39;) with empty string for no value, but these can be set to anything.
+     */
+    getValueList: function() {
+        var me = this,
+            fmt = me.reminderValueFormat,
+            stringFormat = Ext.String.format;
+            
+        return [
+            [&#39;&#39;, me.noneText],
+            [&#39;0&#39;, me.atStartTimeText],
+            [&#39;5&#39;, stringFormat(fmt, &#39;5&#39;, me.getMinutesText(5))],
+            [&#39;15&#39;, stringFormat(fmt, &#39;15&#39;, me.getMinutesText(15))],
+            [&#39;30&#39;, stringFormat(fmt, &#39;30&#39;, me.getMinutesText(30))],
+            [&#39;60&#39;, stringFormat(fmt, &#39;1&#39;, me.getHoursText(1))],
+            [&#39;90&#39;, stringFormat(fmt, &#39;1.5&#39;, me.getHoursText(1.5))],
+            [&#39;120&#39;, stringFormat(fmt, &#39;2&#39;, me.getHoursText(2))],
+            [&#39;180&#39;, stringFormat(fmt, &#39;3&#39;, me.getHoursText(3))],
+            [&#39;360&#39;, stringFormat(fmt, &#39;6&#39;, me.getHoursText(6))],
+            [&#39;720&#39;, stringFormat(fmt, &#39;12&#39;, me.getHoursText(12))],
+            [&#39;1440&#39;, stringFormat(fmt, &#39;1&#39;, me.getDaysText(1))],
+            [&#39;2880&#39;, stringFormat(fmt, &#39;2&#39;, me.getDaysText(2))],
+            [&#39;4320&#39;, stringFormat(fmt, &#39;3&#39;, me.getDaysText(3))],
+            [&#39;5760&#39;, stringFormat(fmt, &#39;4&#39;, me.getDaysText(4))],
+            [&#39;7200&#39;, stringFormat(fmt, &#39;5&#39;, me.getDaysText(5))],
+            [&#39;10080&#39;, stringFormat(fmt, &#39;1&#39;, me.getWeeksText(1))],
+            [&#39;20160&#39;, stringFormat(fmt, &#39;2&#39;, me.getWeeksText(2))]
+        ];
+    },
+    
+<span id='Extensible-calendar-form-field-ReminderCombo-method-getMinutesText'>    /**
+</span>     * Returns the unit text to use for a reminder that has a specified number of minutes
+     * prior to the due time (defaults to &#39;minute&#39; when the passed value === 1, else &#39;minutes&#39;).
+     * @param {Number} numMinutes The number of minutes prior to the due time
+     * @return {String} The unit text
+     */
+    getMinutesText: function(numMinutes) {
+        return numMinutes === 1 ? this.minuteText : this.minutesText;
+    },
+<span id='Extensible-calendar-form-field-ReminderCombo-method-getHoursText'>    /**
+</span>     * Returns the unit text to use for a reminder that has a specified number of hours
+     * prior to the due time (defaults to &#39;hour&#39; when the passed value === 1, else &#39;hours&#39;).
+     * @param {Number} numHours The number of hours prior to the due time
+     * @return {String} The unit text
+     */
+    getHoursText: function(numHours) {
+        return numHours === 1 ? this.hourText : this.hoursText;
+    },
+<span id='Extensible-calendar-form-field-ReminderCombo-method-getDaysText'>    /**
+</span>     * Returns the unit text to use for a reminder that has a specified number of days
+     * prior to the due time (defaults to &#39;day&#39; when the passed value === 1, else &#39;days&#39;).
+     * @param {Number} numDays The number of days prior to the due time
+     * @return {String} The unit text
+     */
+    getDaysText: function(numDays) {
+        return numDays === 1 ? this.dayText : this.daysText;
+    },
+<span id='Extensible-calendar-form-field-ReminderCombo-method-getWeeksText'>    /**
+</span>     * Returns the unit text to use for a reminder that has a specified number of weeks
+     * prior to the due time (defaults to &#39;week&#39; when the passed value === 1, else &#39;weeks&#39;).
+     * @param {Number} numWeeks The number of weeks prior to the due time
+     * @return {String} The unit text
+     */
+    getWeeksText: function(numWeeks) {
+        return numWeeks === 1 ? this.weekText : this.weeksText;
+    },
+    
+<span id='Extensible-calendar-form-field-ReminderCombo-method-initValue'>    /**
+</span>     * @protected 
+     */
+    initValue: function() {
+        if(this.value !== undefined) {
+            this.setValue(this.value);
+        }
+        else{
+            this.setValue(&#39;&#39;);
+        }
+        this.originalValue = this.getValue();
+    }
+});</pre>
+</body>
+</html>

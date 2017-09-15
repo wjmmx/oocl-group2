@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+ * Default Croatian (hr_HR) locale
+ * By Grgur Grisogono
+ */
+
+Ext.onReady(function() {
+    var exists = Ext.Function.bind(Ext.ClassManager.get, Ext.ClassManager);
+    
+    Extensible.Date.use24HourTime = false;
+    
+    if (exists(&#39;Extensible.calendar.view.AbstractCalendar&#39;)) {
+        Ext.apply(Extensible.calendar.view.AbstractCalendar.prototype, {
+            startDay: 0,
+            todayText: &#39;Today&#39;,
+            defaultEventTitleText: &#39;(Bez naziva)&#39;,
+            ddCreateEventText: &#39;Novi dogadaj za {0}&#39;,
+            ddMoveEventText: &#39;Premjesti dogadaj za {0}&#39;,
+            ddResizeEventText: &#39;Promijeni vrijeme dogadaja na {0}&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.view.Month&#39;)) {
+        Ext.apply(Extensible.calendar.view.Month.prototype, {
+            moreText: &#39;+{0} više...&#39;,
+            getMoreText: function(numEvents) {
+                return &#39;+{0} više...&#39;;
+            },
+            detailsTitleDateFormat: &#39;F d&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.CalendarPanel&#39;)) {
+        Ext.apply(Extensible.calendar.CalendarPanel.prototype, {
+            todayText: &#39;Danas&#39;,
+            dayText: &#39;Dan&#39;,
+            weekText: &#39;Tjedan&#39;,
+            monthText: &#39;Mjesec&#39;,
+            jumpToText: &#39;Pokaži datum:&#39;,
+            goText: &#39;Pokaži&#39;,
+            multiDayText: &#39;{0} dana&#39;,
+            multiWeekText: &#39;{0} tjedana&#39;,
+            getMultiDayText: function(numDays) {
+                return &#39;{0} dana&#39;;
+            },
+            getMultiWeekText: function(numWeeks) {
+                return &#39;{0} tjedana&#39;;
+            }
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.EventWindow&#39;)) {
+        Ext.apply(Extensible.calendar.form.EventWindow.prototype, {
+            width: 660,
+            labelWidth: 60,
+            titleTextAdd: &#39;Novi unos&#39;,
+            titleTextEdit: &#39;Izmjeni unos&#39;,
+            savingMessage: &#39;Spremam promjene...&#39;,
+            deletingMessage: &#39;Brišem unos...&#39;,
+            detailsLinkText: &#39;Izmjena detalja unosa...&#39;,
+            saveButtonText: &#39;Spremi&#39;,
+            deleteButtonText: &#39;Briši&#39;,
+            cancelButtonText: &#39;Odustani&#39;,
+            titleLabelText: &#39;Naziv&#39;,
+            datesLabelText: &#39;Vrijeme&#39;,
+            calendarLabelText: &#39;Kalendar&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.EventDetails&#39;)) {
+        Ext.apply(Extensible.calendar.form.EventDetails.prototype, {
+            labelWidth: 65,
+            labelWidthRightCol: 90,
+            title: &#39;Obrada unosa&#39;,
+            titleTextAdd: &#39;Novi unos&#39;,
+            titleTextEdit: &#39;Izmjena unosa&#39;,
+            saveButtonText: &#39;Spremi&#39;,
+            deleteButtonText: &#39;Briši&#39;,
+            cancelButtonText: &#39;Odustani&#39;,
+            titleLabelText: &#39;Naziv&#39;,
+            datesLabelText: &#39;Vrijeme&#39;,
+            reminderLabelText: &#39;Podsjetnik&#39;,
+            notesLabelText: &#39;Bilješke&#39;,
+            locationLabelText: &#39;Lokacija&#39;,
+            webLinkLabelText: &#39;Internet adresa&#39;,
+            calendarLabelText: &#39;Kalendar&#39;,
+            repeatsLabelText: &#39;Ponavljanje&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.field.DateRange&#39;)) {
+        Ext.apply(Extensible.form.field.DateRange.prototype, {
+            toText: &#39;do&#39;,
+            allDayText: &#39;Cjelodnevni događaj&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.field.CalendarCombo&#39;)) {
+        Ext.apply(Extensible.calendar.form.field.CalendarCombo.prototype, {
+            fieldLabel: &#39;Kalendar&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.gadget.CalendarListPanel&#39;)) {
+        Ext.apply(Extensible.calendar.gadget.CalendarListPanel.prototype, {
+            title: &#39;Kalendari&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.gadget.CalendarListMenu&#39;)) {
+        Ext.apply(Extensible.calendar.gadget.CalendarListMenu.prototype, {
+            displayOnlyThisCalendarText: &#39;Prikaži samo ovaj kalendar&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.recurrence.Combo&#39;)) {
+        Ext.apply(Extensible.form.recurrence.Combo.prototype, {
+            fieldLabel: &#39;Ponavljanje&#39;,
+            recurrenceText: {
+                none: &#39;Ne ponavlja se&#39;,
+                daily: &#39;Dnevno&#39;,
+                weekly: &#39;Tjedno&#39;,
+                monthly: &#39;Mjesečno&#39;,
+                yearly: &#39;Godišnje&#39;
+            }
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.field.ReminderCombo&#39;)) {
+        Ext.apply(Extensible.calendar.form.field.ReminderCombo.prototype, {
+            fieldLabel: &#39;Podsjetnik&#39;,
+            noneText: &#39;Nema&#39;,
+            atStartTimeText: &#39;Na početku&#39;,
+            getMinutesText: function(numMinutes) {
+                return &#39;minuta&#39;;
+            },
+            getHoursText: function(numHours) {
+                return numHours === 1 ? &#39;sat&#39; : &#39;sati&#39;;
+            },
+            getDaysText: function(numDays) {
+                return numDays === 1 ? &#39;dan&#39; : &#39;dana&#39;;
+            },
+            getWeeksText: function(numWeeks) {
+                return numWeeks === 1 ? &#39;tjedan&#39; : &#39;tjedana&#39;;
+            },
+            reminderValueFormat: &#39;{0} {1} prije početka&#39; // e.g. &quot;2 hours before start&quot;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.field.DateRange&#39;)) {
+        Ext.apply(Extensible.form.field.DateRange.prototype, {
+            dateFormat: &#39;d.m.Y.&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.menu.Event&#39;)) {
+        Ext.apply(Extensible.calendar.menu.Event.prototype, {
+            editDetailsText: &#39;Izmjena unosa&#39;,
+            deleteText: &#39;Briši&#39;,
+            moveToText: &#39;Premjesti...&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.dd.DropZone&#39;)) {
+        Ext.apply(Extensible.calendar.dd.DropZone.prototype, {
+            dateRangeFormat: &#39;{0}-{1}&#39;,
+            dateFormat: &#39;d.m.&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.dd.DayDropZone&#39;)) {
+        Ext.apply(Extensible.calendar.dd.DayDropZone.prototype, {
+            dateRangeFormat: &#39;{0}-{1}&#39;,
+            dateFormat : &#39;d.m.&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.template.BoxLayout&#39;)) {
+        Ext.apply(Extensible.calendar.template.BoxLayout.prototype, {
+            firstWeekDateFormat: &#39;D m&#39;,
+            otherWeeksDateFormat: &#39;m&#39;,
+            singleDayDateFormat: &#39;l, m. F, Y&#39;,
+            multiDayFirstDayFormat: &#39;d. M, Y&#39;,
+            multiDayMonthStartFormat: &#39;d. M&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.template.Month&#39;)) {
+        Ext.apply(Extensible.calendar.template.Month.prototype, {
+            dayHeaderFormat: &#39;D&#39;,
+            dayHeaderTitleFormat: &#39;l, m. F, Y&#39;
+        });
+    }
+});</pre>
+</body>
+</html>

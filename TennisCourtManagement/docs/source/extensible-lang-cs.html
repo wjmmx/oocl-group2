@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+* Czech locale
+* By Martin Kusyn (2011/03/09)
+*/
+
+Ext.onReady(function() {
+    var exists = Ext.Function.bind(Ext.ClassManager.get, Ext.ClassManager);
+    
+    Extensible.Date.use24HourTime = true;
+    
+    if (exists(&#39;Extensible.calendar.view.AbstractCalendar&#39;)) {
+        Ext.apply(Extensible.calendar.view.AbstractCalendar.prototype, {
+            startDay: 1,
+            todayText: &#39;Dnes&#39;,
+            defaultEventTitleText: &#39;(Bez názvu)&#39;,
+            ddCreateEventText: &#39;Vytvořit událost v čase {0}&#39;,
+            ddMoveEventText: &#39;Přenést událost na {0}&#39;,
+            ddResizeEventText: &#39;Aktualizovat událost v čase {0}&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.view.Month&#39;)) {
+        Ext.apply(Extensible.calendar.view.Month.prototype, {
+            detailsTitleDateFormat: &#39;j. F&#39;,
+            getMoreText: function(numEvents) {
+                return numEvents &lt; 5 ? &#39;+{0} další...&#39; : &#39;+{0} dalších...&#39;;
+            }
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.CalendarPanel&#39;)) {
+        Ext.apply(Extensible.calendar.CalendarPanel.prototype, {
+            todayText: &#39;Dnes&#39;,
+            dayText: &#39;Den&#39;,
+            weekText: &#39;Týden&#39;,
+            monthText: &#39;Měsíc&#39;,
+            jumpToText: &#39;Přejít na:&#39;,
+            goText: &#39;Přejít&#39;,
+            getMultiDayText: function(numDays) {
+                return numDays &lt; 5 ? &#39;{0} Dny&#39; : &#39;{0} Dní&#39;;
+            },
+            getMultiWeekText: function(numWeeks) {
+                return numWeeks &lt; 5 ? &#39;{0} Týdny&#39; : &#39;{0} Týdnů&#39;;
+            }
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.EventWindow&#39;)) {
+        Ext.apply(Extensible.calendar.form.EventWindow.prototype, {
+            width: 600,
+            labelWidth: 65,
+            titleTextAdd: &#39;Přidat událost&#39;,
+            titleTextEdit: &#39;Upravit událost&#39;,
+            savingMessage: &#39;Ukládání změn...&#39;,
+            deletingMessage: &#39;Smazat událost...&#39;,
+            detailsLinkText: &#39;Upravit detaily...&#39;,
+            saveButtonText: &#39;Uložit&#39;,
+            deleteButtonText: &#39;Smazat&#39;,
+            cancelButtonText: &#39;Storno&#39;,
+            titleLabelText: &#39;Název&#39;,
+            datesLabelText: &#39;Kdy&#39;,
+            calendarLabelText: &#39;Kalendář&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.EventDetails&#39;)) {
+        Ext.apply(Extensible.calendar.form.EventDetails.prototype, {
+            labelWidth: 65,
+            labelWidthRightCol: 65,
+            title: &#39;Událost&#39;,
+            titleTextAdd: &#39;Přidat událost&#39;,
+            titleTextEdit: &#39;Upravit událost&#39;,
+            saveButtonText: &#39;Uložit&#39;,
+            deleteButtonText: &#39;Smazat&#39;,
+            cancelButtonText: &#39;Storno&#39;,
+            titleLabelText: &#39;Název&#39;,
+            datesLabelText: &#39;Kdy&#39;,
+            reminderLabelText: &#39;Upomínka&#39;,
+            notesLabelText: &#39;Poznámky&#39;,
+            locationLabelText: &#39;Kde&#39;,
+            webLinkLabelText: &#39;Odkaz&#39;,
+            calendarLabelText: &#39;Kalendář&#39;,
+            repeatsLabelText: &#39;Opakování&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.field.DateRange&#39;)) {
+        Ext.apply(Extensible.form.field.DateRange.prototype, {
+            toText: &#39;do&#39;,
+            allDayText: &#39;Celý den&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.field.CalendarCombo&#39;)) {
+        Ext.apply(Extensible.calendar.form.field.CalendarCombo.prototype, {
+            fieldLabel: &#39;Kalendář&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.gadget.CalendarListPanel&#39;)) {
+        Ext.apply(Extensible.calendar.gadget.CalendarListPanel.prototype, {
+            title: &#39;Kalendáře&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.gadget.CalendarListMenu&#39;)) {
+        Ext.apply(Extensible.calendar.gadget.CalendarListMenu.prototype, {
+            displayOnlyThisCalendarText: &#39;Zobrazit pouze tento kalendář&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.recurrence.Combo&#39;)) {
+        Ext.apply(Extensible.form.recurrence.Combo.prototype, {
+            fieldLabel: &#39;Opakování&#39;,
+            recurrenceText: {
+                none: &#39;Neopakovat&#39;,
+                daily: &#39;Denně&#39;,
+                weekly: &#39;Týdně&#39;,
+                monthly: &#39;Mesíčně&#39;,
+                yearly: &#39;Ročně&#39;
+            }
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.field.ReminderCombo&#39;)) {
+        Ext.apply(Extensible.calendar.form.field.ReminderCombo.prototype, {
+            fieldLabel: &#39;Připomínka&#39;,
+            noneText: &#39;Žádná&#39;,
+            atStartTimeText: &#39;Na začátku&#39;,
+            getMinutesText: function(numMinutes) {
+                if(numMinutes === 1) {
+                    return &#39;minuta&#39;;
+                }
+                return numMinutes &lt; 5 ? &#39;minuty&#39; : &#39;minut&#39;;
+            },
+            getHoursText: function(numHours) {
+                if(numHours === 1) {
+                    return &#39;hodina&#39;;
+                }
+                return numHours &lt; 5 ? &#39;hodiny&#39; : &#39;hodin&#39;;
+            },
+            getDaysText: function(numDays) {
+                if(numDays === 1) {
+                    return &#39;den&#39;;
+                }
+                return numDays &lt; 5 ? &#39;dny&#39; : &#39;dní&#39;;
+            },
+            getWeeksText: function(numWeeks) {
+                if(numWeeks === 1) {
+                    return &#39;týden&#39;;
+                }
+                return numWeeks &lt; 5 ? &#39;týdny&#39; : &#39;týdnů&#39;;
+            },
+            reminderValueFormat: &#39;{0} {1} před začátkem&#39; // e.g. &quot;2 hours before start&quot;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.field.DateRange&#39;)) {
+        Ext.apply(Extensible.form.field.DateRange.prototype, {
+            dateFormat: &#39;j. n. Y&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.menu.Event&#39;)) {
+        Ext.apply(Extensible.calendar.menu.Event.prototype, {
+            editDetailsText: &#39;Upravit detaily&#39;,
+            deleteText: &#39;Smazat&#39;,
+            moveToText: &#39;Přesunout...&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.dd.DropZone&#39;)) {
+        Ext.apply(Extensible.calendar.dd.DropZone.prototype, {
+            dateRangeFormat: &#39;{0}-{1}&#39;,
+            dateFormat: &#39;j.n.&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.dd.DayDropZone&#39;)) {
+        Ext.apply(Extensible.calendar.dd.DayDropZone.prototype, {
+            dateRangeFormat: &#39;{0}-{1}&#39;,
+            dateFormat : &#39;j.n&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.template.BoxLayout&#39;)) {
+        Ext.apply(Extensible.calendar.template.BoxLayout.prototype, {
+            firstWeekDateFormat: &#39;D j.&#39;,
+            otherWeeksDateFormat: &#39;j&#39;,
+            singleDayDateFormat: &#39;l, j. F Y&#39;,
+            multiDayFirstDayFormat: &#39;j. M, Y&#39;,
+            multiDayMonthStartFormat: &#39;j. M&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.template.Month&#39;)) {
+        Ext.apply(Extensible.calendar.template.Month.prototype, {
+            dayHeaderFormat: &#39;D&#39;,
+            dayHeaderTitleFormat: &#39;l, j. F Y&#39;
+        });
+    }
+    
+    if(Ext.form.TimeField) {
+        Ext.apply(Ext.form.TimeField.prototype, {
+            minText : &quot;Čas v tomto poli musí být stejný nebo pozdější než {0}&quot;,
+            maxText : &quot;Čas v tomto poli musí být stejný nebo dřívější než {0}&quot;,
+            invalidText : &quot;{0} není platný čas&quot;,
+            format : &quot;H:i&quot;,
+            altFormats : &quot;g:ia|g:iA|g:i a|g:i A|h:i|g:i|H:i|ga|ha|gA|h a|g a|g A|gi|hi|gia|hia|g|H&quot;
+        });
+    }
+});</pre>
+</body>
+</html>

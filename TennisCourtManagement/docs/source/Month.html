@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-template-Month'>/**
+</span> * This is the template used to render the {@link Extensible.calendar.view.Month MonthView}. Internally this class defers to an
+ * instance of {@link Extensible.calendar.template.BoxLayout} to handle the inner layout rendering and adds containing elements around
+ * that to form the month view.
+ *
+ * This template is automatically bound to the underlying event store by the
+ * calendar components and expects records of type {@link Extensible.calendar.data.EventModel}.
+ */
+Ext.define(&#39;Extensible.calendar.template.Month&#39;, {
+    extend: &#39;Ext.XTemplate&#39;,
+
+    requires: [&#39;Extensible.calendar.template.BoxLayout&#39;],
+
+<span id='Extensible-calendar-template-Month-cfg-dayHeaderFormat'>    /**
+</span>     * @cfg {String} dayHeaderFormat
+     * The date format to use for day headers, if used (defaults to &#39;D&#39;, e.g. &#39;Mon&#39; for Monday)
+     */
+    dayHeaderFormat: &#39;D&#39;,
+<span id='Extensible-calendar-template-Month-cfg-dayHeaderTitleFormat'>    /**
+</span>     * @cfg {String} dayHeaderTitleFormat
+     * The date format to use for the day header&#39;s HTML title attribute displayed on mouseover
+     * (defaults to &#39;l, F j, Y&#39;, e.g. &#39;Monday, December 27, 2010&#39;)
+     */
+    dayHeaderTitleFormat: &#39;l, F j, Y&#39;,
+
+<span id='Extensible-calendar-template-Month-method-constructor'>    constructor: function(config) {
+</span>
+        Ext.apply(this, config);
+
+        this.weekTpl = Ext.create(&#39;Extensible.calendar.template.BoxLayout&#39;, config);
+        this.weekTpl.compile();
+
+        var weekLinkTpl = this.showWeekLinks ? &#39;&lt;div class=&quot;ext-cal-week-link-hd&quot;&gt;&amp;#160;&lt;/div&gt;&#39; : &#39;&#39;;
+
+        Extensible.calendar.template.Month.superclass.constructor.call(this,
+            &#39;&lt;div class=&quot;ext-cal-inner-ct {extraClasses}&quot;&gt;&#39;,
+                &#39;&lt;div class=&quot;ext-cal-hd-ct ext-cal-month-hd&quot;&gt;&#39;,
+                    weekLinkTpl,
+                    &#39;&lt;table class=&quot;ext-cal-hd-days-tbl&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&#39;,
+                        &#39;&lt;tbody&gt;&#39;,
+                            &#39;&lt;tr&gt;&#39;,
+                                &#39;&lt;tpl for=&quot;days&quot;&gt;&#39;,
+                                    &#39;&lt;th class=&quot;ext-cal-hd-day{[xindex==1 ? &quot; ext-cal-day-first&quot; : &quot;&quot;]}&quot; title=&quot;{title}&quot;&gt;{name}&lt;/th&gt;&#39;,
+                                &#39;&lt;/tpl&gt;&#39;,
+                            &#39;&lt;/tr&gt;&#39;,
+                        &#39;&lt;/tbody&gt;&#39;,
+                    &#39;&lt;/table&gt;&#39;,
+                &#39;&lt;/div&gt;&#39;,
+                &#39;&lt;div class=&quot;ext-cal-body-ct&quot;&gt;{weeks}&lt;/div&gt;&#39;,
+            &#39;&lt;/div&gt;&#39;
+        );
+    },
+
+<span id='Extensible-calendar-template-Month-method-applyTemplate'>    applyTemplate: function(o) {
+</span>        var days = [],
+            weeks = this.weekTpl.apply(o),
+            dt = Extensible.Date.add(Ext.Date.clearTime(o.viewStart, true), {hours: 12}),
+            templateConfig;
+
+        for (var i = 0; i &lt; 7; i++) {
+            days.push({
+                name: Ext.Date.format(dt, this.dayHeaderFormat),
+                title: Ext.Date.format(dt, this.dayHeaderTitleFormat)
+            });
+            dt = Extensible.Date.add(dt, {days: 1});
+        }
+
+        var extraClasses = this.showHeader === true ? &#39;&#39; : &#39;ext-cal-noheader&#39;;
+        if (this.showWeekLinks) {
+            extraClasses += &#39; ext-cal-week-links&#39;;
+        }
+
+        templateConfig = {
+            days: days,
+            weeks: weeks,
+            extraClasses: extraClasses
+        };
+
+        if (Ext.getVersion(&#39;extjs&#39;).isLessThan(&#39;4.1&#39;)) {
+            return Extensible.calendar.template.Month.superclass.applyTemplate.call(this, templateConfig);
+        }
+        else {
+            return this.applyOut(templateConfig, []).join(&#39;&#39;);
+        }
+    }
+},
+function() {
+    this.createAlias(&#39;apply&#39;, &#39;applyTemplate&#39;);
+});
+</pre>
+</body>
+</html>

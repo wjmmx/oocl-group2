@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-form-field-CalendarCombo'>/**
+</span> * A custom combo used for choosing from the list of available calendars to assign an event to. You must
+ * pass a populated calendar store as the store config or the combo will not work.
+ * 
+ * This is pretty much a standard combo that is simply pre-configured for the options needed by the
+ * calendar components. The default configs are as follows:
+ *		fieldLabel: &#39;Calendar&#39;,
+ *		triggerAction: &#39;all&#39;,
+ *		queryMode: &#39;local&#39;,
+ *		forceSelection: true,
+ *		width: 200
+ */
+Ext.define(&#39;Extensible.calendar.form.field.CalendarCombo&#39;, {
+    extend: &#39;Ext.form.field.ComboBox&#39;,
+    alias: &#39;widget.extensible.calendarcombo&#39;,
+    
+    requires: [&#39;Extensible.calendar.data.CalendarMappings&#39;],
+    
+<span id='Extensible-calendar-form-field-CalendarCombo-property-fieldLabel'>    fieldLabel: &#39;Calendar&#39;,
+</span><span id='Extensible-calendar-form-field-CalendarCombo-property-triggerAction'>    triggerAction: &#39;all&#39;,
+</span><span id='Extensible-calendar-form-field-CalendarCombo-property-queryMode'>    queryMode: &#39;local&#39;,
+</span><span id='Extensible-calendar-form-field-CalendarCombo-property-forceSelection'>    forceSelection: true,
+</span><span id='Extensible-calendar-form-field-CalendarCombo-property-selectOnFocus'>    selectOnFocus: true,
+</span>    
+<span id='Extensible-calendar-form-field-CalendarCombo-property-defaultCls'>    defaultCls: &#39;x-cal-default&#39;,
+</span><span id='Extensible-calendar-form-field-CalendarCombo-property-hiddenCalendarCls'>    hiddenCalendarCls: &#39;ext-cal-hidden&#39;,
+</span>    
+<span id='Extensible-calendar-form-field-CalendarCombo-method-initComponent'>    initComponent: function() {
+</span>        this.valueField = Extensible.calendar.data.CalendarMappings.CalendarId.name;
+        this.displayField = Extensible.calendar.data.CalendarMappings.Title.name;
+    
+        this.listConfig = Ext.apply(this.listConfig || {}, {
+            getInnerTpl: this.getListItemTpl
+        });
+        
+        this.store.on(&#39;update&#39;, this.refreshColorCls, this);
+        
+        this.callParent(arguments);
+    },
+    
+<span id='Extensible-calendar-form-field-CalendarCombo-method-getListItemTpl'>    getListItemTpl: function(displayField) {
+</span>        return &#39;&lt;div class=&quot;x-combo-list-item x-cal-{&#39; + Extensible.calendar.data.CalendarMappings.ColorId.name +
+                &#39;}&quot;&gt;&lt;div class=&quot;ext-cal-picker-icon&quot;&gt;&amp;#160;&lt;/div&gt;{&#39; + displayField + &#39;}&lt;/div&gt;&#39;;
+    },
+    
+<span id='Extensible-calendar-form-field-CalendarCombo-method-afterRender'>    afterRender: function() {
+</span>        this.callParent(arguments);
+        
+        this.wrap = this.el.down(&#39;.x-form-item-body&#39;);
+        this.wrap.addCls(&#39;ext-calendar-picker&#39;);
+        
+        this.icon = Ext.core.DomHelper.append(this.wrap, {
+            tag: &#39;div&#39;, cls: &#39;ext-cal-picker-icon ext-cal-picker-mainicon&#39;
+        });
+    },
+    
+<span id='Extensible-calendar-form-field-CalendarCombo-method-refreshColorCls'>    /* @private
+</span>     * Refresh the color CSS class based on the current field value
+     */
+    refreshColorCls: function() {
+        var me = this,
+            calendarMappings = Extensible.calendar.data.CalendarMappings,
+            colorCls = &#39;&#39;,
+            value = me.getValue();
+        
+        if (!me.wrap) {
+            return me;
+        }
+        if (me.currentStyleClss !== undefined) {
+            me.wrap.removeCls(me.currentStyleClss);
+        }
+        
+        if (!Ext.isEmpty(value)) {
+            if (Ext.isArray(value)) {
+                value = value[0];
+            }
+            if (!value.data) {
+                // this is a calendar id, need to get the record first then use its color
+                value = this.store.findRecord(calendarMappings.CalendarId.name, value);
+            }
+            colorCls = &#39;x-cal-&#39; + (value.data ? value.data[calendarMappings.ColorId.name] : value);
+        }
+        
+        me.currentStyleClss = colorCls;
+        
+//        if (value &amp;&amp; value.data &amp;&amp; value.data[calendarMappings.IsHidden.name] === true) {
+//            colorCls += &#39; &#39; + me.hiddenCalendarCls;
+//        }
+        me.wrap.addCls(colorCls);
+        
+        return me;
+    },
+    
+<span id='Extensible-calendar-form-field-CalendarCombo-method-setValue'>    /**
+</span>     * @protected 
+     */
+    setValue: function(value) {
+        if (!value &amp;&amp; this.store.getCount() &gt; 0) {
+            // ensure that a valid value is always set if possible
+            value = this.store.getAt(0).data[Extensible.calendar.data.CalendarMappings.CalendarId.name];
+        }
+        
+        this.callParent(arguments);
+        
+        this.refreshColorCls();
+    }
+});</pre>
+</body>
+</html>

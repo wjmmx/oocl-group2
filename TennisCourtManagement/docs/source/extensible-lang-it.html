@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+ * Italian (IT) locale
+ * By Stefano Perinetti - www.slweb.it
+ */
+
+Ext.onReady(function() {
+    var exists = Ext.Function.bind(Ext.ClassManager.get, Ext.ClassManager);
+    
+    Extensible.Date.use24HourTime = true;
+    
+    if (exists(&#39;Extensible.calendar.view.AbstractCalendar&#39;)) {
+        Ext.apply(Extensible.calendar.view.AbstractCalendar.prototype, {
+            startDay: 0,
+            todayText: &#39;Oggi&#39;,
+            defaultEventTitleText: &#39;(Nessun titolo)&#39;,
+            ddCreateEventText: &#39;Crea evento per {0}&#39;,
+            ddMoveEventText: &#39;Sposta evento su {0}&#39;,
+            ddResizeEventText: &#39;Aggiorna evento su {0}&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.view.Month&#39;)) {
+        Ext.apply(Extensible.calendar.view.Month.prototype, {
+            moreText: &#39;+{0} di pi\u00F9...&#39;,
+            getMoreText: function(numEvents) {
+                return &#39;+{0} di pi\u00F9...&#39;;
+            },
+            detailsTitleDateFormat: &#39;j F&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.CalendarPanel&#39;)) {
+        Ext.apply(Extensible.calendar.CalendarPanel.prototype, {
+            todayText: &#39;Oggi&#39;,
+            dayText: &#39;Giorno&#39;,
+            weekText: &#39;Settimana&#39;,
+            monthText: &#39;Mese&#39;,
+            jumpToText: &#39;Vai a:&#39;,
+            goText: &#39;Go&#39;,
+            multiDayText: &#39;{0} Giorni&#39;,
+            multiWeekText: &#39;{0} Settimane&#39;,
+            getMultiDayText: function(numDays) {
+                return &#39;{0} Giorni&#39;;
+            },
+            getMultiWeekText: function(numWeeks) {
+                return &#39;{0} Settimane&#39;;
+            }
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.EventWindow&#39;)) {
+        Ext.apply(Extensible.calendar.form.EventWindow.prototype, {
+            width: 620,
+            labelWidth: 65,
+            titleTextAdd: &#39;Nuovo Evento&#39;,
+            titleTextEdit: &#39;Modifica Evento&#39;,
+            savingMessage: &#39;Salvo i cambiamenti...&#39;,
+            deletingMessage: &#39;Elimino l\&#39;evento...&#39;,
+            detailsLinkText: &#39;Modifica Dettagli...&#39;,
+            saveButtonText: &#39;Salva&#39;,
+            deleteButtonText: &#39;Elimina&#39;,
+            cancelButtonText: &#39;Cancella&#39;,
+            titleLabelText: &#39;Titolo&#39;,
+            datesLabelText: &#39;Quando&#39;,
+            calendarLabelText: &#39;Calendario&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.EventDetails&#39;)) {
+        Ext.apply(Extensible.calendar.form.EventDetails.prototype, {
+            labelWidth: 65,
+            labelWidthRightCol: 65,
+            title: &#39;Evento&#39;,
+            titleTextAdd: &#39;Nuovo Evento&#39;,
+            titleTextEdit: &#39;Modifica Evento&#39;,
+            saveButtonText: &#39;Salva&#39;,
+            deleteButtonText: &#39;Elimina&#39;,
+            cancelButtonText: &#39;Cancella&#39;,
+            titleLabelText: &#39;Titolo&#39;,
+            datesLabelText: &#39;Quando&#39;,
+            reminderLabelText: &#39;Ricorda&#39;,
+            notesLabelText: &#39;Note&#39;,
+            locationLabelText: &#39;Localit\u00E0&#39;,
+            webLinkLabelText: &#39;Web Link&#39;,
+            calendarLabelText: &#39;Calendario&#39;,
+            repeatsLabelText: &#39;Ripetizioni&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.field.DateRange&#39;)) {
+        Ext.apply(Extensible.form.field.DateRange.prototype, {
+            toText: &#39;Al&#39;,
+            allDayText: &#39;Giornata&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.field.CalendarCombo&#39;)) {
+        Ext.apply(Extensible.calendar.form.field.CalendarCombo.prototype, {
+            fieldLabel: &#39;Calendario&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.gadget.CalendarListPanel&#39;)) {
+        Ext.apply(Extensible.calendar.gadget.CalendarListPanel.prototype, {
+            title: &#39;Calendari&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.gadget.CalendarListMenu&#39;)) {
+        Ext.apply(Extensible.calendar.gadget.CalendarListMenu.prototype, {
+            displayOnlyThisCalendarText: &#39;Mostra solo questo calendario&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.recurrence.Combo&#39;)) {
+        Ext.apply(Extensible.form.recurrence.Combo.prototype, {
+            fieldLabel: &#39;Ripeti&#39;,
+            recurrenceText: {
+                none: &#39;Non ripetere&#39;,
+                daily: &#39;Giornalmente&#39;,
+                weekly: &#39;Settimanalmente&#39;,
+                monthly: &#39;Mensilmente&#39;,
+                yearly: &#39;Annualmente&#39;
+            }
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.form.field.ReminderCombo&#39;)) {
+        Ext.apply(Extensible.calendar.form.field.ReminderCombo.prototype, {
+            fieldLabel: &#39;Allarme&#39;,
+            noneText: &#39;Nessuno&#39;,
+            atStartTimeText: &#39;All\&#39;inizio&#39;,
+            getMinutesText: function(numMinutes) {
+                return numMinutes === 1 ? &#39;minuto&#39; : &#39;minuti&#39;;
+            },
+            getHoursText: function(numHours) {
+                return numHours === 1 ? &#39;ora&#39; : &#39;ore&#39;;
+            },
+            getDaysText: function(numDays) {
+                return numDays === 1 ? &#39;giorno&#39; : &#39;giorni&#39;;
+            },
+            getWeeksText: function(numWeeks) {
+                return numWeeks === 1 ? &#39;settimana&#39; : &#39;settimane&#39;;
+            },
+            reminderValueFormat: &#39;{0} {1} prima&#39; // e.g. &quot;2 hours before start&quot;
+        });
+    }
+    
+    if (exists(&#39;Extensible.form.field.DateRange&#39;)) {
+        Ext.apply(Extensible.form.field.DateRange.prototype, {
+            dateFormat: &#39;j/n/Y&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.menu.Event&#39;)) {
+        Ext.apply(Extensible.calendar.menu.Event.prototype, {
+            editDetailsText: &#39;Modifica dettagli&#39;,
+            deleteText: &#39;Elimina&#39;,
+            moveToText: &#39;Sposta su...&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.dd.DropZone&#39;)) {
+        Ext.apply(Extensible.calendar.dd.DropZone.prototype, {
+            dateRangeFormat: &#39;{0}-{1}&#39;,
+            dateFormat: &#39;j/n&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.dd.DayDropZone&#39;)) {
+        Ext.apply(Extensible.calendar.dd.DayDropZone.prototype, {
+            dateRangeFormat: &#39;{0}-{1}&#39;,
+            dateFormat : &#39;j/n&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.template.BoxLayout&#39;)) {
+        Ext.apply(Extensible.calendar.template.BoxLayout.prototype, {
+            firstWeekDateFormat: &#39;D j&#39;,
+            otherWeeksDateFormat: &#39;j&#39;,
+            singleDayDateFormat: &#39;l, j F Y&#39;,
+            multiDayFirstDayFormat: &#39;j M Y&#39;,
+            multiDayMonthStartFormat: &#39;j M&#39;
+        });
+    }
+    
+    if (exists(&#39;Extensible.calendar.template.Month&#39;)) {
+        Ext.apply(Extensible.calendar.template.Month.prototype, {
+            dayHeaderFormat: &#39;D&#39;,
+            dayHeaderTitleFormat: &#39;l, j F Y&#39;
+        });
+    }
+});</pre>
+</body>
+</html>

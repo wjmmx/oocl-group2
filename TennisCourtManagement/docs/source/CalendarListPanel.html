@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-gadget-CalendarListPanel'>/**
+</span> * This is a {@link Ext.Panel panel} subclass that renders a list of available calendars.
+ * It is not part of the Extensible.calendar.CalendarPanel component, but is instead meant
+ * to be displayed somewhere else inside of an application layout.
+ */
+Ext.define(&#39;Extensible.calendar.gadget.CalendarListPanel&#39;, {
+    extend: &#39;Ext.panel.Panel&#39;,
+    alias: &#39;widget.extensible.calendarlist&#39;,
+    
+    requires: [
+        &#39;Ext.XTemplate&#39;,
+        &#39;Extensible.calendar.gadget.CalendarListMenu&#39;
+    ],
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-property-title'>    title: &#39;Calendars&#39;,
+</span><span id='Extensible-calendar-gadget-CalendarListPanel-property-collapsible'>    collapsible: true,
+</span><span id='Extensible-calendar-gadget-CalendarListPanel-property-autoHeight'>    autoHeight: true,
+</span><span id='Extensible-calendar-gadget-CalendarListPanel-property-layout'>    layout: &#39;fit&#39;,
+</span><span id='Extensible-calendar-gadget-CalendarListPanel-property-menuSelector'>    menuSelector: &#39;em&#39;,
+</span><span id='Extensible-calendar-gadget-CalendarListPanel-property-width'>    width: 100, // this should be overridden by this container&#39;s layout
+</span>    
+<span id='Extensible-calendar-gadget-CalendarListPanel-cfg-store'>    /**
+</span>     * @cfg {Ext.data.Store} store
+     * A {@link Ext.data.Store store} containing records of type {@link Extensible.calendar.data.CalendarModel CalendarRecord}.
+     * This is a required config and is used to populate the calendar list.  The CalendarList widget will also listen for events from
+     * the store and automatically refresh iteself in the event that the underlying calendar records in the store change.
+     */
+    
+    initComponent: function() {
+        this.addCls(&#39;x-calendar-list&#39;);
+        this.callParent(arguments);
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-afterRender'>    afterRender: function(ct, position) {
+</span>        this.callParent(arguments);
+        
+        if(this.store) {
+            this.setStore(this.store, true);
+        }
+        this.refresh();
+        
+        this.body.on(&#39;click&#39;, this.onClick, this);
+        this.body.on(&#39;mouseover&#39;, this.onMouseOver, this, {delegate: &#39;li&#39;});
+        this.body.on(&#39;mouseout&#39;, this.onMouseOut, this, {delegate: &#39;li&#39;});
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-getListTemplate'>    getListTemplate: function() {
+</span>        if(!this.tpl) {
+            this.tpl = !(Ext.isIE || Ext.isOpera) ?
+                Ext.create(&#39;Ext.XTemplate&#39;,
+                    &#39;&lt;ul class=&quot;x-unselectable&quot;&gt;&lt;tpl for=&quot;.&quot;&gt;&#39;,
+                        &#39;&lt;li id=&quot;{cmpId}&quot; class=&quot;ext-cal-evr {colorCls} {hiddenCls}&quot;&gt;{title}&lt;em&gt;&amp;#160;&lt;/em&gt;&lt;/li&gt;&#39;,
+                    &#39;&lt;/tpl&gt;&lt;/ul&gt;&#39;
+                )
+                : Ext.create(&#39;Ext.XTemplate&#39;,
+                    &#39;&lt;ul class=&quot;x-unselectable&quot;&gt;&lt;tpl for=&quot;.&quot;&gt;&#39;,
+                        &#39;&lt;li id=&quot;{cmpId}&quot; class=&quot;ext-cal-evo {colorCls} {hiddenCls}&quot;&gt;&#39;,
+                            &#39;&lt;div class=&quot;ext-cal-evm&quot;&gt;&#39;,
+                                &#39;&lt;div class=&quot;ext-cal-evi&quot;&gt;{title}&lt;em&gt;&amp;#160;&lt;/em&gt;&lt;/div&gt;&#39;,
+                            &#39;&lt;/div&gt;&#39;,
+                        &#39;&lt;/li&gt;&#39;,
+                    &#39;&lt;/tpl&gt;&lt;/ul&gt;&#39;
+                );
+            this.tpl.compile();
+        }
+        return this.tpl;
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-setStore'>    /**
+</span>     * Sets the store used to display the available calendars. It should contain
+     * records of type {@link Extensible.calendar.data.CalendarModel CalendarRecord}.
+     * @param {Ext.data.Store} store
+     */
+    setStore: function(store, initial) {
+        if(!initial &amp;&amp; this.store) {
+            this.store.un(&quot;load&quot;, this.refresh, this);
+            this.store.un(&quot;add&quot;, this.refresh, this);
+            this.store.un(&quot;remove&quot;, this.refresh, this);
+            this.store.un(&quot;update&quot;, this.onUpdate, this);
+            this.store.un(&quot;clear&quot;, this.refresh, this);
+        }
+        if(store) {
+            store.on(&quot;load&quot;, this.refresh, this);
+            store.on(&quot;add&quot;, this.refresh, this);
+            store.on(&quot;remove&quot;, this.refresh, this);
+            store.on(&quot;update&quot;, this.onUpdate, this);
+            store.on(&quot;clear&quot;, this.refresh, this);
+        }
+        this.store = store;
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-onUpdate'>    onUpdate: function(ds, rec, operation) {
+</span>        // ignore EDIT notifications, only refresh after a commit
+        if(operation === Ext.data.Record.COMMIT) {
+            this.refresh();
+        }
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-refresh'>    /**
+</span>     * Refreshes the calendar list so that it displays based on the most current state of
+     * the underlying calendar store. Usually this method does not need to be called directly
+     * as the control is automatically bound to the store&#39;s events, but it is available in the
+     * event that a manual refresh is ever needed.
+     */
+    refresh: function() {
+        if(this.skipRefresh) {
+            return;
+        }
+        var data = [], i = 0, o = null,
+            CM = Extensible.calendar.data.CalendarMappings,
+            recs = this.store.getRange(),
+            len = recs.length;
+            
+        for (; i &lt; len; i++) {
+            o = {
+                cmpId: this.id + &#39;__&#39; + recs[i].data[CM.CalendarId.name],
+                title: recs[i].data[CM.Title.name],
+                colorCls: this.getColorCls(recs[i].data[CM.ColorId.name])
+            };
+            if(recs[i].data[CM.IsHidden.name] === true) {
+                o.hiddenCls = &#39;ext-cal-hidden&#39;;
+            }
+            data[data.length] = o;
+        }
+        this.getListTemplate().overwrite(this.body, data);
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-getColorCls'>    getColorCls: function(colorId) {
+</span>        return &#39;x-cal-&#39;+colorId+&#39;-ad&#39;;
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-toggleCalendar'>    toggleCalendar: function(id, commit) {
+</span>        var rec = this.store.findRecord(Extensible.calendar.data.CalendarMappings.CalendarId.name, id),
+            CM = Extensible.calendar.data.CalendarMappings,
+            isHidden = rec.data[CM.IsHidden.name];
+        
+        rec.set(CM.IsHidden.name, !isHidden);
+        
+        if(commit !== false) {
+            rec.commit();
+        }
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-showCalendar'>    showCalendar: function(id, commit) {
+</span>        var rec = this.store.findRecord(Extensible.calendar.data.CalendarMappings.CalendarId.name, id);
+        if(rec.data[Extensible.calendar.data.CalendarMappings.IsHidden.name] === true) {
+            this.toggleCalendar(id, commit);
+        }
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-hideCalendar'>    hideCalendar: function(id, commit) {
+</span>        var rec = this.store.findRecord(Extensible.calendar.data.CalendarMappings.CalendarId.name, id);
+        if(rec.data[Extensible.calendar.data.CalendarMappings.IsHidden.name] !== true) {
+            this.toggleCalendar(id, commit);
+        }
+    },
+    
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-radioCalendar'>    radioCalendar: function(id) {
+</span>        var i = 0, recId,
+            calendarId = Extensible.calendar.data.CalendarMappings.CalendarId.name,
+            recs = this.store.getRange(),
+            len = recs.length;
+            
+        for (; i &lt; len; i++) {
+            recId = recs[i].data[calendarId];
+            // make a truthy check so that either numeric or string ids can match
+            if(recId === id) {
+                this.showCalendar(recId, false);
+            }
+            else{
+                this.hideCalendar(recId, false);
+            }
+        }
+        
+        // store.commitChanges() just loops over each modified record and calls rec.commit(),
+        // which in turns fires an update event that would cause a full refresh for each record.
+        // To avoid this we simply set a flag and make sure we only refresh once per commit set.
+        this.skipRefresh = true;
+        this.store.sync();
+        delete this.skipRefresh;
+        this.refresh();
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-onMouseOver'>    onMouseOver: function(e, t) {
+</span>        Ext.fly(t).addCls(&#39;hover&#39;);
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-onMouseOut'>    onMouseOut: function(e, t) {
+</span>        Ext.fly(t).removeCls(&#39;hover&#39;);
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-getCalendarId'>    getCalendarId: function(el) {
+</span>        return el.id.split(&#39;__&#39;)[1];
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-getCalendarItemEl'>    getCalendarItemEl: function(calendarId) {
+</span>        return Ext.get(this.id+&#39;__&#39;+calendarId);
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-onClick'>    onClick: function(e, t) {
+</span>        var el = e.getTarget(this.menuSelector, 3, true);
+        
+        if (el) {
+            this.showEventMenu(el, e.getXY());
+        }
+        else {
+            el = e.getTarget(&#39;li&#39;, 3, true);
+            
+            if (el) {
+                this.toggleCalendar(this.getCalendarId(el));
+            }
+        }
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-handleColorChange'>    handleColorChange: function(menu, id, colorId, origColorId) {
+</span>        var rec = this.store.findRecord(Extensible.calendar.data.CalendarMappings.CalendarId.name, id);
+        rec.data[Extensible.calendar.data.CalendarMappings.ColorId.name] = colorId;
+        rec.commit();
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-handleRadioCalendar'>    handleRadioCalendar: function(menu, id) {
+</span>        this.radioCalendar(id);
+    },
+
+<span id='Extensible-calendar-gadget-CalendarListPanel-method-showEventMenu'>    showEventMenu: function(el, xy) {
+</span>        var id = this.getCalendarId(el.parent(&#39;li&#39;)),
+            rec = this.store.findRecord(Extensible.calendar.data.CalendarMappings.CalendarId.name, id),
+            colorId = rec.data[Extensible.calendar.data.CalendarMappings.ColorId.name];
+            
+        if(!this.menu) {
+            this.menu = Ext.create(&#39;Extensible.calendar.gadget.CalendarListMenu&#39;);
+            this.menu.on(&#39;colorchange&#39;, this.handleColorChange, this);
+            this.menu.on(&#39;radiocalendar&#39;, this.handleRadioCalendar, this);
+        }
+        this.menu.setCalendar(id, colorId);
+        this.menu.showAt(xy);
+    }
+});</pre>
+</body>
+</html>

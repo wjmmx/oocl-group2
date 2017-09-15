@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+ * A simple reusable store that loads static calendar field definitions into memory
+ * and can be bound to the CalendarCombo widget and used for calendar color selection.
+ */
+Ext.define(&#39;Extensible.calendar.data.MemoryCalendarStore&#39;, {
+    extend: &#39;Ext.data.Store&#39;,
+    model: &#39;Extensible.calendar.data.CalendarModel&#39;,
+    
+    requires: [
+        &#39;Ext.data.proxy.Memory&#39;,
+        &#39;Ext.data.reader.Json&#39;,
+        &#39;Ext.data.writer.Json&#39;,
+        &#39;Extensible.calendar.data.CalendarModel&#39;,
+        &#39;Extensible.calendar.data.CalendarMappings&#39;
+    ],
+    
+    proxy: {
+        type: &#39;memory&#39;,
+        reader: {
+            type: &#39;json&#39;,
+            root: &#39;calendars&#39;
+        },
+        writer: {
+            type: &#39;json&#39;
+        }
+    },
+
+    autoLoad: true,
+    
+    initComponent: function() {
+        this.sorters = this.sorters || [{
+            property: Extensible.calendar.data.CalendarMappings.Title.name,
+            direction: &#39;ASC&#39;
+        }];
+        
+        this.idProperty = this.idProperty || Extensible.calendar.data.CalendarMappings.CalendarId.name || &#39;id&#39;;
+        
+        this.fields = Extensible.calendar.data.CalendarModel.prototype.fields.getRange();
+        
+        this.callParent(arguments);
+    }
+});</pre>
+</body>
+</html>

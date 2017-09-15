@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Extensible-calendar-template-BoxLayout'>/**
+</span> * This is the template used to render calendar views based on small day boxes within a non-scrolling container
+ * (currently the {@link Extensible.calendar.view.Month MonthView} and the all-day headers for
+ * {@link Extensible.calendar.view.Day DayView} and {@link Extensible.calendar.view.Week WeekView}. This template
+ * is automatically bound to the underlying event store by the calendar components and expects records of type
+ * {@link Extensible.calendar.data.EventModel}.
+ */
+Ext.define(&#39;Extensible.calendar.template.BoxLayout&#39;, {
+    extend: &#39;Ext.XTemplate&#39;,
+
+    requires: [&#39;Ext.Date&#39;],
+
+<span id='Extensible-calendar-template-BoxLayout-cfg-firstWeekDateFormat'>    /**
+</span>     * @cfg {String} firstWeekDateFormat
+     * The date format used for the day boxes in the first week of the view only (subsequent weeks
+     * use the {@link #otherWeeksDateFormat} config). Defaults to &#39;D j&#39;. Note that if the day names header is displayed
+     * above the first row (e.g., {@link Extensible.calendar.view.Month#showHeader MonthView.showHeader} = true)
+     * then this value is ignored and {@link #otherWeeksDateFormat} will be used instead.
+     */
+    firstWeekDateFormat: &#39;D j&#39;,
+<span id='Extensible-calendar-template-BoxLayout-cfg-otherWeeksDateFormat'>    /**
+</span>     * @cfg {String} otherWeeksDateFormat
+     * The date format used for the date in day boxes (other than the first week, which is controlled by
+     * {@link #firstWeekDateFormat}). Defaults to &#39;j&#39;.
+     */
+    otherWeeksDateFormat: &#39;j&#39;,
+<span id='Extensible-calendar-template-BoxLayout-cfg-singleDayDateFormat'>    /**
+</span>     * @cfg {String} singleDayDateFormat
+     * The date format used for the date in the header when in single-day view (defaults to &#39;l, F j, Y&#39;).
+     */
+    singleDayDateFormat: &#39;l, F j, Y&#39;,
+<span id='Extensible-calendar-template-BoxLayout-cfg-multiDayFirstDayFormat'>    /**
+</span>     * @cfg {String} multiDayFirstDayFormat
+     * The date format used for the date in the header when more than one day are visible (defaults to &#39;M j, Y&#39;).
+     */
+    multiDayFirstDayFormat: &#39;M j, Y&#39;,
+<span id='Extensible-calendar-template-BoxLayout-cfg-multiDayMonthStartFormat'>    /**
+</span>     * @cfg {String} multiDayMonthStartFormat
+     * The date format to use for the first day in a month when more than one day are visible (defaults to &#39;M j&#39;).
+     * Note that if this day falls on the first day within the view, {@link #multiDayFirstDayFormat} takes precedence.
+     */
+    multiDayMonthStartFormat: &#39;M j&#39;,
+
+<span id='Extensible-calendar-template-BoxLayout-method-constructor'>    constructor: function(config) {
+</span>
+        Ext.apply(this, config);
+
+        var weekLinkTpl = this.showWeekLinks ? &#39;&lt;div id=&quot;{weekLinkId}&quot; class=&quot;ext-cal-week-link&quot;&gt;{weekNum}&lt;/div&gt;&#39; : &#39;&#39;;
+
+        Extensible.calendar.template.BoxLayout.superclass.constructor.call(this,
+            &#39;&lt;tpl for=&quot;weeks&quot;&gt;&#39;,
+                &#39;&lt;div id=&quot;{[this.id]}-wk-{[xindex-1]}&quot; class=&quot;ext-cal-wk-ct&quot; style=&quot;top:{[this.getRowTop(xindex, xcount)]}%; height:{[this.getRowHeight(xcount)]}%;&quot;&gt;&#39;,
+                    weekLinkTpl,
+                    &#39;&lt;table class=&quot;ext-cal-bg-tbl&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&#39;,
+                        &#39;&lt;tbody&gt;&#39;,
+                            &#39;&lt;tr&gt;&#39;,
+                                &#39;&lt;tpl for=&quot;.&quot;&gt;&#39;,
+                                     &#39;&lt;td id=&quot;{[this.id]}-day-{date:date(&quot;Ymd&quot;)}&quot; class=&quot;{cellCls}&quot;&gt;&amp;#160;&lt;/td&gt;&#39;,
+                                &#39;&lt;/tpl&gt;&#39;,
+                            &#39;&lt;/tr&gt;&#39;,
+                        &#39;&lt;/tbody&gt;&#39;,
+                    &#39;&lt;/table&gt;&#39;,
+                    &#39;&lt;table class=&quot;ext-cal-evt-tbl&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&#39;,
+                        &#39;&lt;tbody&gt;&#39;,
+                            &#39;&lt;tr&gt;&#39;,
+                                &#39;&lt;tpl for=&quot;.&quot;&gt;&#39;,
+                                    &#39;&lt;td id=&quot;{[this.id]}-ev-day-{date:date(&quot;Ymd&quot;)}&quot; class=&quot;{titleCls}&quot;&gt;&lt;div&gt;{title}&lt;/div&gt;&lt;/td&gt;&#39;,
+                                &#39;&lt;/tpl&gt;&#39;,
+                            &#39;&lt;/tr&gt;&#39;,
+                        &#39;&lt;/tbody&gt;&#39;,
+                    &#39;&lt;/table&gt;&#39;,
+                &#39;&lt;/div&gt;&#39;,
+            &#39;&lt;/tpl&gt;&#39;, {
+                getRowTop: function(i, ln) {
+                    return ((i-1)*(100/ln));
+                },
+                getRowHeight: function(ln) {
+                    return 100/ln;
+                }
+            }
+        );
+    },
+
+<span id='Extensible-calendar-template-BoxLayout-method-applyTemplate'>    applyTemplate: function(o) {
+</span>
+        Ext.apply(this, o);
+
+        var w = 0,
+            title = &#39;&#39;,
+            first = true,
+            isToday = false,
+            showMonth = false,
+            prevMonth = false,
+            nextMonth = false,
+            isWeekend = false,
+            weekendCls = o.weekendCls,
+            prevMonthCls = o.prevMonthCls,
+            nextMonthCls = o.nextMonthCls,
+            todayCls = o.todayCls,
+            weeks = [[]],
+            dt = Extensible.Date.add(Ext.Date.clearTime(this.viewStart, true), {hours: 12}),
+            thisMonth = this.startDate.getMonth();
+
+        for (; w &lt; this.weekCount || this.weekCount === -1; w++) {
+            if (dt &gt; this.viewEnd) {
+                break;
+            }
+            weeks[w] = [];
+
+            for (var d = 0; d &lt; this.dayCount; d++) {
+                isToday = Extensible.Date.isToday(dt);
+                showMonth = first || (dt.getDate() === 1);
+                prevMonth = (dt.getMonth() &lt; thisMonth) &amp;&amp; this.weekCount === -1;
+                nextMonth = (dt.getMonth() &gt; thisMonth) &amp;&amp; this.weekCount === -1;
+                isWeekend = dt.getDay() % 6 === 0;
+
+                if (dt.getDay() === 1) {
+                    // The ISO week format &#39;W&#39; is relative to a Monday week start. If we
+                    // make this check on Sunday the week number will be off.
+                    weeks[w].weekNum = this.showWeekNumbers ? Ext.Date.format(dt, &#39;W&#39;) : &#39;&amp;#160;&#39;;
+                    weeks[w].weekLinkId = &#39;ext-cal-week-&#39;+Ext.Date.format(dt, &#39;Ymd&#39;);
+                }
+
+                if (showMonth) {
+                    if (isToday) {
+                        title = this.getTodayText();
+                    }
+                    else {
+                        title = Ext.Date.format(dt, this.dayCount === 1 ? this.singleDayDateFormat :
+                                (first ? this.multiDayFirstDayFormat : this.multiDayMonthStartFormat));
+                    }
+                }
+                else {
+                    var dayFmt = (w === 0 &amp;&amp; this.showHeader !== true) ? this.firstWeekDateFormat : this.otherWeeksDateFormat;
+                    title = isToday ? this.getTodayText() : Ext.Date.format(dt, dayFmt);
+                }
+
+                weeks[w].push({
+                    title: title,
+                    date: Ext.Date.clone(dt),
+
+                    titleCls: &#39;ext-cal-dtitle &#39; + (isToday ? &#39; ext-cal-dtitle-today&#39; : &#39;&#39;) +
+                        (w === 0 ? &#39; ext-cal-dtitle-first&#39; : &#39;&#39;) +
+                        (prevMonth ? &#39; ext-cal-dtitle-prev&#39; : &#39;&#39;) +
+                        (nextMonth ? &#39; ext-cal-dtitle-next&#39; : &#39;&#39;),
+
+                    cellCls: &#39;ext-cal-day &#39; + (isToday ? &#39; &#39; + todayCls : &#39;&#39;) +
+                        (d === 0 ? &#39; ext-cal-day-first&#39; : &#39;&#39;) +
+                        (prevMonth ? &#39; &#39; + prevMonthCls : &#39;&#39;) +
+                        (nextMonth ? &#39; &#39; + nextMonthCls : &#39;&#39;) +
+                        (isWeekend &amp;&amp; weekendCls ? &#39; &#39; + weekendCls : &#39;&#39;)
+                });
+
+                dt = Extensible.Date.add(dt, {days: 1});
+                first = false;
+            }
+        }
+
+        if (Ext.getVersion(&#39;extjs&#39;).isLessThan(&#39;4.1&#39;)) {
+            return Extensible.calendar.template.BoxLayout.superclass.applyTemplate.call(this, {
+                weeks: weeks
+            });
+        }
+        else {
+            return this.applyOut({
+                weeks: weeks
+            }, []).join(&#39;&#39;);
+        }
+    },
+
+<span id='Extensible-calendar-template-BoxLayout-method-getTodayText'>    getTodayText: function() {
+</span>        var timeFmt = Extensible.Date.use24HourTime ? &#39;G:i &#39; : &#39;g:ia &#39;,
+            todayText = this.showTodayText !== false ? this.todayText : &#39;&#39;,
+            timeText = this.showTime !== false ? &#39; &lt;span id=&quot;&#39; + this.id +
+                &#39;-clock&quot; class=&quot;ext-cal-dtitle-time&quot; aria-live=&quot;off&quot;&gt;&#39; +
+                Ext.Date.format(new Date(), timeFmt) + &#39;&lt;/span&gt;&#39; : &#39;&#39;,
+            separator = todayText.length &gt; 0 || timeText.length &gt; 0 ? &#39; &amp;#8212; &#39; : &#39;&#39;; // &amp;#8212; == &amp;mdash;
+
+        if (this.dayCount === 1) {
+            return Ext.Date.format(new Date(), this.singleDayDateFormat) + separator + todayText + timeText;
+        }
+        var fmt = this.weekCount === 1 ? this.firstWeekDateFormat : this.otherWeeksDateFormat;
+        return todayText.length &gt; 0 ? todayText + timeText : Ext.Date.format(new Date(), fmt) + timeText;
+    }
+},
+function() {
+    this.createAlias(&#39;apply&#39;, &#39;applyTemplate&#39;);
+});
+</pre>
+</body>
+</html>
