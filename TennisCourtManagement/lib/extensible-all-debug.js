@@ -5684,6 +5684,8 @@ Ext.define('Extensible.form.field.DateRange', {
     },
 
     getEndTimeConfig: function() {
+      var $this = this;
+      var cmpId = $this.id;
         return {
             xtype: 'timefield',
             id: this.id + '-end-time',
@@ -5691,7 +5693,7 @@ Ext.define('Extensible.form.field.DateRange', {
             labelWidth: 0,
             hideLabel: true,
             width: 90,
-            increment: 120,
+            increment: 60,
             maxValue:'9:00 PM',
             minValue:'9:00 AM',
             format: this.timeFormat,
@@ -5701,7 +5703,25 @@ Ext.define('Extensible.form.field.DateRange', {
                         this.onFieldChange('time', 'end');
                     },
                     scope: this
-                }
+                },
+                  'afterrender':{
+                      fn: function(){
+                          setTimeout(function(){
+                            console.log('cmpId:',cmpId);
+                            Ext.getCmp(cmpId+'-end-time').getStore().filterBy(function(e){
+
+                              if(e.index %2 !==0 ) {
+                                console.log(e.index);
+                                return true;
+                              }
+                              else{
+                                return false;
+                              }
+                            })
+                          },1000);
+                      },
+                      scope: this
+                  }
             }
         };
     },

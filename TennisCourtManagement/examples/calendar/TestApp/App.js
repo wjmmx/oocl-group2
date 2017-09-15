@@ -27,9 +27,7 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
     ],
 
     constructor : function() {
-        Ext.override(Ext.form.field.Time,{
-            minValue: '9:00 AM'
-        });
+
 
 	    var CPanel = Extensible.calendar.CalendarPanel;
         var ACalendar = Extensible.calendar.view.AbstractCalendar;

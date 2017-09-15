@@ -155,6 +155,9 @@ Ext.define('Extensible.form.field.DateRange', {
             labelWidth: 0,
             hideLabel: true,
             width: 90,
+            store: new Ext.data.ArrayStore({
+
+            }),
             format: this.timeFormat,
             listeners: {
                 'select': {
