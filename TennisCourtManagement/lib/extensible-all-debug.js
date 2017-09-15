@@ -6799,7 +6799,7 @@ Ext.define('Extensible.calendar.form.EventDetails', {
     title: 'Event Form',
     titleTextAdd: 'Add Event',
     titleTextEdit: 'Edit Event',
-    titleLabelText: 'Title',
+    titleLabelText: 'Name',
     datesLabelText: 'When',
     reminderLabelText: 'Reminder',
     notesLabelText: 'Notes',
@@ -7212,8 +7212,8 @@ Ext.define('Extensible.calendar.form.EventWindow', {
     ],
 
     // Locale configs
-    titleTextAdd: 'Add Event',
-    titleTextEdit: 'Edit Event',
+    titleTextAdd: 'Add Tennis Reservation',
+    titleTextEdit: 'Edit Tennis Reservation',
     width: 600,
     labelWidth: 65,
     detailsLinkText: 'Edit Details...',
@@ -7222,7 +7222,8 @@ Ext.define('Extensible.calendar.form.EventWindow', {
     saveButtonText: 'Save',
     deleteButtonText: 'Delete',
     cancelButtonText: 'Cancel',
-    titleLabelText: 'Title',
+    titleLabelText: 'Name',
+    titleTelephoneText: 'Telephone',
     datesLabelText: 'When',
     calendarLabelText: 'Calendar',
     /**
@@ -7369,6 +7370,12 @@ Ext.define('Extensible.calendar.form.EventWindow', {
             itemId: this.id + '-title',
             name: Extensible.calendar.data.EventMappings.Title.name,
             fieldLabel: this.titleLabelText,
+            anchor: '100%'
+        },{
+            xtype: 'textfield',
+            itemId: this.id + '-telephone',
+            name: Extensible.calendar.data.EventMappings.Notes.name,
+            fieldLabel: this.titleTelephoneText,
             anchor: '100%'
         },{
             xtype: 'extensible.daterangefield',
@@ -9410,13 +9417,35 @@ Ext.define('Extensible.calendar.view.AbstractCalendar', {
     },
 
     onEventEditorAdd: function(form, rec) {
-        this.newRecord = rec;
+       this.newRecord = rec;
 
+        var storeItems = this.store.data.items.length;
+        var flag = false;
+
+
+        for(var i =0; i<storeItems; i++){
+
+                if(rec.data.CalendarId == this.store.data.items[i].data.CalendarId){
+                     if(rec.data.StartDate.getTime() ==  this.store.data.items[i].data.StartDate.getTime()){
+
+                         flag = true;
+                        }
+                     
+                }
+
+        }
+
+
+        if(flag == false){
         if (this.store.indexOf(rec) === -1) {
             this.store.add(rec);
         }
         this.save();
         this.fireEvent('eventadd', this, rec);
+        } else{
+
+            alert('You have a conflicting reservation! Please pick another time');
+        }
     },
 
     onEventEditorUpdate: function(form, rec) {

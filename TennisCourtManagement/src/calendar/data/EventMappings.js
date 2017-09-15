@@ -89,7 +89,7 @@ Extensible.calendar.data.EventMappings = {
     },
     CalendarId: {
         name:    'CalendarId',
-        mapping: 'cid',
+        mapping: 'cid', 
         type:    'string'
     },
     Title: {
