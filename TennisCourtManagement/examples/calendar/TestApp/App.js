@@ -185,7 +185,7 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
             items: [{
                 id: 'app-header',
                 region: 'north',
-                height: 35,
+                height: 70,
                 border: false,
                 contentEl: 'app-header-content'
             },{
@@ -380,7 +380,7 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
     },
     updateTitle: function(){
         var p = Ext.getCmp('app-center');
-        p.setTitle('Calendar');
+        p.setTitle('Reservation for this Week');
 
     },
 
