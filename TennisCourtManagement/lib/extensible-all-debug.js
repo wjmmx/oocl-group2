@@ -5651,6 +5651,7 @@ Ext.define('Extensible.form.field.DateRange', {
             labelWidth: 0,
             hideLabel: true,
             width: 90,
+            increment: 120,
             format: this.timeFormat,
             listeners: {
                 'select': {
@@ -5690,6 +5691,9 @@ Ext.define('Extensible.form.field.DateRange', {
             labelWidth: 0,
             hideLabel: true,
             width: 90,
+            increment: 120,
+            maxValue:'9:00 PM',
+            minValue:'9:00 AM',
             format: this.timeFormat,
             listeners: {
                 'select': {

@@ -27,6 +27,10 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
     ],
 
     constructor : function() {
+        Ext.override(Ext.form.field.Time,{
+            minValue: '9:00 AM'
+        });
+
 	    var CPanel = Extensible.calendar.CalendarPanel;
         var ACalendar = Extensible.calendar.view.AbstractCalendar;
 	    var courts = Ext.create('Ext.data.Store', {
@@ -96,6 +100,8 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
 	            }]
 	        });
 	    });
+
+        
 
         Ext.override(ACalendar, {
             enableDD: false
@@ -217,10 +223,11 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
                     // Any generic view options that should be applied to all sub views:
                     viewConfig: {
                         //enableFx: false,
-                        //ddIncrement: 10, //only applies to DayView and subclasses, but convenient to put it here
+                        ddIncrement: 120, //only applies to DayView and subclasses, but convenient to put it here
                         viewStartHour: 9,
                         viewEndHour: 21,
-                        minEventDisplayMinutes: 120,
+                        hourIncrement : 120,
+                        // minEventDisplayMinutes: 120,
                         showTime: false
                     },
 
@@ -236,7 +243,11 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
                     multiWeekViewCfg: {
                         //weekCount: 3
                     },
-
+                    
+                    multiDayConfig:{
+                        hourIncrement : 120,
+                        minEventDisplayMinutes: 120,
+                    },
                     // Some optional CalendarPanel configs to experiment with:
                     // readOnly: true,
                     activeItem: 0,
@@ -257,7 +268,8 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
                     listeners: {
                         'eventclick': {
                             fn: function(vw, rec, el){
-                                this.clearMsg();
+                                console.log('event click');
+                                //this.clearMsg();
                             },
                             scope: this
                         },
