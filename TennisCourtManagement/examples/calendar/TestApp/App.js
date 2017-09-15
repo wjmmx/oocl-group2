@@ -267,7 +267,7 @@ Ext.define('Extensible.example.calendar.TestApp.App', {
                         'eventclick': {
                             fn: function(vw, rec, el){
                                 console.log('event click');
-                                //this.clearMsg();
+                                this.clearMsg();
                             },
                             scope: this
                         },
