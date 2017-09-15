@@ -3605,12 +3605,12 @@ Ext.define('Extensible.calendar.template.BoxLayout', {
                     }
                     else {
                         title = Ext.Date.format(dt, this.dayCount === 1 ? this.singleDayDateFormat :
-                                (first ? this.multiDayFirstDayFormat : this.multiDayMonthStartFormat));
+                                (first ? this.singleDayDateFormat : this.multiDayMonthStartFormat));
                     }
                 }
                 else {
                     var dayFmt = (w === 0 && this.showHeader !== true) ? this.firstWeekDateFormat : this.otherWeeksDateFormat;
-                    title = isToday ? this.getTodayText() : Ext.Date.format(dt, dayFmt);
+                    title = Ext.Date.format(dt, this.singleDayDateFormat);
                 }
 
                 weeks[w].push({
